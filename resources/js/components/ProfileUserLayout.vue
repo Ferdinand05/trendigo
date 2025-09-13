@@ -13,10 +13,13 @@ import Separator from './ui/separator/Separator.vue';
         <aside class="w-full max-w-xl lg:w-48">
             <nav class="flex flex-col space-y-1 space-x-0">
                 <Button variant="ghost" class="w-full justify-start hover:cursor-pointer">
+                    <Link :href="route('profile.show.order')" prefetch="hover" class="w-full text-left">Pesanan</Link>
+                </Button>
+                <Button variant="ghost" class="w-full justify-start hover:cursor-pointer">
                     <Link :href="route('profile.user.index')" class="w-full text-left" prefetch="hover">Profil</Link>
                 </Button>
                 <Button variant="ghost" class="w-full justify-start hover:cursor-pointer">
-                    <Link :href="route('profile.show.order')" prefetch="hover" class="w-full text-left">Pesanan</Link>
+                    <Link href="" prefetch="hover" class="w-full text-left">Password</Link>
                 </Button>
                 <Button variant="ghost" class="w-full justify-start hover:cursor-pointer">
                     <Link :href="route('profile.show.setting')" class="w-full text-left" prefetch="hover">Pengaturan</Link>

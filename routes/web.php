@@ -28,6 +28,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('user/profile', [ProfileUserController::class, 'update'])->name('profile.user.save');
     Route::get('user/profile/orders', [ProfileUserController::class, 'showOrder'])->name('profile.show.order');
     Route::get('user/profile/setting', [ProfileUserController::class, 'showSetting'])->name('profile.show.setting');
+    Route::get('user/profile/orders/{id}/print', [ProfileUserController::class, 'printOrder'])->name('user.print.order');
+
 
     // add product to cart, must login
     Route::post('/product/add-to-cart', [CartController::class, 'addToCart'])->name('add.to.cart');
@@ -88,6 +90,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // dashboard Order
     Route::get('dashboard/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::post('dashboard/orders/order-done', [OrderController::class, 'orderDone'])->name('order.done');
+    Route::delete('dashboard/orders/{id}/destroy', [OrderController::class, 'destroy'])->name('order.destroy');
+
+    // print order
+    Route::get('/orders/{id}/print/pdf', [OrderController::class, 'printDetailOrder'])->name('print.detail.order.pdf');
+    Route::get('/orders/shipping-order/{id}/print/pdf', [OrderController::class, 'printShippingOrder'])->name('print.shipping.order.pdf');
+    Route::get('/orders/print/pdf', [OrderController::class, 'printOrdersPdf'])->name('print.orders.pdf');
 });
 
 

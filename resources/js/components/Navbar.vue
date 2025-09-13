@@ -50,6 +50,9 @@ onUnmounted(() => {
                     <Link href="/" class="rounded-sm px-2 py-1.5 text-[15px] font-medium text-gray-200 hover:text-gray-400" prefetch="hover">
                         Beranda
                     </Link>
+                    <Link href="#product" class="rounded-sm px-2 py-1.5 text-[15px] font-medium text-gray-200 hover:text-gray-400" prefetch="hover">
+                        Produk
+                    </Link>
 
                     <!-- Contoh Navigation Menu -->
                     <div>
@@ -93,9 +96,11 @@ onUnmounted(() => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent class="mr-1.5 w-40">
                                 <DropdownMenuItem>
-                                    <Link :href="route('profile.user.index')">Profile</Link>
+                                    <Link :href="route('profile.user.index')" class="w-full">Profile</Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem><Link :href="route('logout')" method="post">Logout</Link></DropdownMenuItem>
+                                <DropdownMenuItem>
+                                    <Link :href="route('logout')" method="post" class="w-full text-left hover:cursor-pointer">Logout</Link>
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
 

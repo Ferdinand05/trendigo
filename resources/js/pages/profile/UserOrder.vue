@@ -87,7 +87,9 @@ const fillModal = (order: Order) => {
                             </div>
                             <div>
                                 <Button size="sm" v-if="order.status == 'pending'" class="hover:cursor-pointer">Selesaikan Pembayaran</Button>
-                                <Button size="sm" v-else-if="order.status == 'paid'" class="hover:cursor-pointer"><Printer /></Button>
+                                <form v-else-if="order.status == 'paid'" :action="route('user.print.order', order.id)" method="get">
+                                    <Button size="sm" class="hover:cursor-pointer"><Printer /></Button>
+                                </form>
                             </div>
                         </CardFooter>
                     </Card>

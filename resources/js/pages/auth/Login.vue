@@ -82,10 +82,15 @@ const submit = () => {
                         </Label>
                     </div>
 
-                    <Button type="submit" class="mt-4 w-full" :tabindex="4" :disabled="form.processing">
-                        <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
-                        Masuk
-                    </Button>
+                    <div class="flex flex-col">
+                        <Button type="submit" class="mt-4 w-full hover:cursor-pointer" :tabindex="4" :disabled="form.processing">
+                            <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
+                            Masuk
+                        </Button>
+                        <Button type="button" variant="outline" class="mt-3 w-full cursor-pointer">
+                            Masuk dengan Google <img width="24" height="24" src="https://img.icons8.com/fluency/48/google-logo.png" alt="google-logo"
+                        /></Button>
+                    </div>
                 </div>
 
                 <div class="text-center text-sm text-muted-foreground">

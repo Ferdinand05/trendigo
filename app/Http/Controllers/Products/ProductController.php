@@ -35,7 +35,7 @@ class ProductController extends Controller
                 $is_active = $status === 'active' ? 1 : 0;
                 $query->where('is_active', $is_active);
             })
-            ->paginate(6)
+            ->paginate(10)
             ->withQueryString();
 
 

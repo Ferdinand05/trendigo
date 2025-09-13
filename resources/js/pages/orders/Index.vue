@@ -6,6 +6,11 @@ import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent } from '@/c
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue';
 import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue';
 import Input from '@/components/ui/input/Input.vue';
+import { PaginationContent } from '@/components/ui/pagination';
+import Pagination from '@/components/ui/pagination/Pagination.vue';
+import PaginationItem from '@/components/ui/pagination/PaginationItem.vue';
+import PaginationNext from '@/components/ui/pagination/PaginationNext.vue';
+import PaginationPrevious from '@/components/ui/pagination/PaginationPrevious.vue';
 import Select from '@/components/ui/select/Select.vue';
 import SelectContent from '@/components/ui/select/SelectContent.vue';
 import SelectGroup from '@/components/ui/select/SelectGroup.vue';
@@ -13,13 +18,16 @@ import SelectItem from '@/components/ui/select/SelectItem.vue';
 import SelectLabel from '@/components/ui/select/SelectLabel.vue';
 import SelectTrigger from '@/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/components/ui/select/SelectValue.vue';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
 import { Order } from '@/types/orders';
-import { Head } from '@inertiajs/vue3';
-import { Check, EllipsisVertical, FilterIcon, MapPin, Printer, PrinterIcon, Search, ShoppingCart, Trash } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { PaginationLinks, PaginationMeta } from '@/types/pagination';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { watchDebounced } from '@vueuse/core';
+import { Check, EllipsisVertical, FilterIcon, MapPin, Printer, Search, ShoppingCart, Trash } from 'lucide-vue-next';
+import Swal from 'sweetalert2';
+import { ref, watch } from 'vue';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Orders',
@@ -34,6 +42,8 @@ function formatRupiah(value: number) {
 const props = defineProps<{
     orders: {
         data: Order[];
+        meta: PaginationMeta;
+        links: PaginationLinks;
     };
 }>();
 
@@ -54,6 +64,93 @@ function showOrderShipping(order: Order) {
     selectedOrder.value = order;
     openModalDetailShipping.value = true;
 }
+
+const selectedStatus = ref();
+watch(selectedStatus, (newVal) => {
+    router.get(
+        route('orders.index'),
+        {
+            status: newVal,
+        },
+        {
+            preserveScroll: true,
+            preserveState: true,
+        },
+    );
+});
+
+const keyword = ref('');
+watchDebounced(
+    keyword,
+    (newKeyword) => {
+        router.get(
+            route('orders.index'),
+            {
+                keyword: newKeyword,
+            },
+            {
+                preserveScroll: true,
+                preserveState: true,
+            },
+        );
+    },
+    {
+        debounce: 600,
+        maxWait: 1200,
+    },
+);
+const page = usePage();
+function orderDone(orderId: number) {
+    router.post(
+        route('order.done'),
+        {
+            orderId: orderId,
+        },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                if (page.props.flash.message == 'Order Done!') {
+                    Swal.fire({
+                        title: 'Good job!',
+                        text: `${page.props.flash.message}`,
+                        icon: 'success',
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: `${page.props.flash.message}`,
+                    });
+                }
+            },
+        },
+    );
+}
+
+function destroyOrder(id: number) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(route('order.destroy', id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    Swal.fire({
+                        title: 'Good job!',
+                        text: `${page.props.flash.message}`,
+                        icon: 'success',
+                    });
+                },
+            });
+        }
+    });
+}
 </script>
 
 <template>
@@ -61,15 +158,16 @@ function showOrderShipping(order: Order) {
     <AppLayout :breadcrumbs="breadcrumbs">
         <section class="p-10">
             <div class="mb-2 flex justify-between">
-                <Select id="category">
+                <Select id="category" v-model="selectedStatus">
                     <SelectTrigger>
                         <SelectValue> <FilterIcon /> Filter </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
                             <SelectLabel>Status</SelectLabel>
-                            <SelectItem value="active"> Active </SelectItem>
-                            <SelectItem value="inactive"> Inactive </SelectItem>
+                            <SelectItem value=" "> <Badge variant="outline">All</Badge> </SelectItem>
+                            <SelectItem value="pending"> <Badge variant="secondary">Pending</Badge> </SelectItem>
+                            <SelectItem value="paid"> <Badge class="bg-green-600">Paid</Badge> </SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
@@ -77,24 +175,27 @@ function showOrderShipping(order: Order) {
             <!-- search and print laporan -->
             <div class="flex items-center justify-between">
                 <div class="relative mb-2 w-full max-w-sm items-center md:max-w-md">
-                    <Input id="search" type="text" placeholder="Search..." class="pl-10" />
+                    <Input id="search" v-model="keyword" type="text" placeholder="Search..." class="pl-10" />
                     <span class="absolute inset-y-0 start-0 flex items-center justify-center px-2">
                         <Search class="size-5 text-muted-foreground" />
                     </span>
                 </div>
                 <div>
-                    <Button type="button" variant="outline" class="cursor-pointer"> <PrinterIcon /> Export </Button>
+                    <form :action="route('print.orders.pdf')" method="get" target="_blank">
+                        <input type="hidden" v-model="selectedStatus" name="status" />
+                        <Button type="submit" class="hover:cursor-pointer">Export PDF <Printer /></Button>
+                    </form>
                 </div>
             </div>
 
             <Table>
-                <TableCaption>A list of your recent orders.</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead>No</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Order Status</TableHead>
                         <TableHead>Code</TableHead>
+                        <TableHead>Username</TableHead>
                         <TableHead>Payment Type</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead class="font-medium">Total</TableHead>
@@ -116,85 +217,139 @@ function showOrderShipping(order: Order) {
                         <TableCell
                             ><kbd>{{ order.order_code }}</kbd></TableCell
                         >
+                        <TableCell>{{ order.user.name }}</TableCell>
                         <TableCell>{{ order.midtrans_payment_type ?? '-' }}</TableCell>
                         <TableCell>{{ order.created_at }}</TableCell>
                         <TableCell class="font-medium">{{ formatRupiah(order.total) }}</TableCell>
                         <TableCell class="space-x-2">
-                            <Button size="sm" class="hover:cursor-pointer" variant="destructive" title=" shipping information"><Trash /> </Button>
+                            <Button
+                                size="sm"
+                                @click.prevent="destroyOrder(order.id)"
+                                class="hover:cursor-pointer"
+                                variant="destructive"
+                                title=" shipping information"
+                                ><Trash />
+                            </Button>
                             <!-- dropdown -->
                             <DropdownMenu>
                                 <DropdownMenuTrigger as-child>
                                     <Button size="sm" class="hover:cursor-pointer" variant="outline"><EllipsisVertical /> </Button>
                                 </DropdownMenuTrigger>
 
-                                <DropdownMenuContent class="mr-10 w-56">
+                                <DropdownMenuContent class="mr-10 w-48">
                                     <DropdownMenuCheckboxItem @click="showOrderDetail(order)">
                                         <ShoppingCart /> Detail Order
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuCheckboxItem @click="showOrderShipping(order)">
                                         <MapPin /> Detail Shipping
                                     </DropdownMenuCheckboxItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuCheckboxItem> <Check /> Order Done </DropdownMenuCheckboxItem>
+                                    <DropdownMenuSeparator v-show="order.order_status == 'process'" />
+                                    <DropdownMenuCheckboxItem @click.prevent="orderDone(order.id)" v-show="order.order_status == 'process'">
+                                        <Check /> Order Done
+                                    </DropdownMenuCheckboxItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </TableCell>
                     </TableRow>
                 </TableBody>
             </Table>
+
+            <!-- Pagination -->
+            <div class="mt-2">
+                <div class="text-sm text-gray-600">
+                    Showing {{ props.orders.meta.per_page }} from {{ props.orders.meta.from }} of {{ props.orders.meta.total }}
+                </div>
+                <Pagination
+                    :v-slot="props.orders.meta.current_page"
+                    :items-per-page="props.orders.meta.per_page"
+                    :total="props.orders.meta.total"
+                    :default-page="props.orders.meta.current_page"
+                >
+                    <PaginationContent :v-slot="props.orders.meta.links">
+                        <Button variant="link" :disabled="props.orders.links.prev == null">
+                            <Link :href="props.orders.links.prev ?? ''">
+                                <PaginationPrevious />
+                            </Link>
+                        </Button>
+
+                        <template v-for="(item, index) in props.orders.meta.links" :key="index">
+                            <PaginationItem v-if="!isNaN(Number(item.label))" :value="props.orders.meta.current_page" :is-active="item.active">
+                                <Link :href="item.url ?? ''">
+                                    {{ item.label }}
+                                </Link>
+                            </PaginationItem>
+                        </template>
+
+                        <Button variant="link" :disabled="props.orders.links.next == null">
+                            <Link :href="props.orders.links.next ?? ''">
+                                <PaginationNext> </PaginationNext>
+                            </Link>
+                        </Button>
+                    </PaginationContent>
+                </Pagination>
+            </div>
+            <!-- END Pagination -->
         </section>
 
         <!-- modal detail dialog -->
         <Dialog v-model:open="openModalDetail">
-            <DialogContent class="sm:max-w-[600px]">
+            <DialogContent class="max-h-[600px] sm:max-w-[600px]">
                 <DialogHeader>
                     <DialogTitle>Order Information</DialogTitle>
                 </DialogHeader>
-                <div v-if="selectedOrder" class="grid grid-cols-1 gap-x-3 gap-y-4 py-4 text-[13px] md:grid-cols-2">
-                    <div>
-                        <p><b>Status :</b> {{ selectedOrder.status }}</p>
-                        <p><b>Order Code :</b> {{ selectedOrder.order_code }}</p>
-                        <p><b>Payment Type :</b> {{ selectedOrder.midtrans_payment_type ?? '-' }}</p>
-                        <p><b>Total :</b> {{ formatRupiah(selectedOrder.total) }}</p>
-                        <p><b>Date :</b> {{ selectedOrder.created_at }}</p>
+                <div class="h-[450px] overflow-y-scroll px-2 pb-5">
+                    <div v-if="selectedOrder" class="grid grid-cols-1 gap-x-3 gap-y-4 py-4 text-[14px] md:grid-cols-2">
+                        <div class="rounded-md p-2 shadow-md">
+                            <h1 class="text-xl font-semibold">Order Info</h1>
+                            <p>Status : {{ selectedOrder.status }}</p>
+                            <p>Order Code : {{ selectedOrder.order_code }}</p>
+                            <p>Payment Type : {{ selectedOrder.midtrans_payment_type ?? '-' }}</p>
+                            <p>Total : {{ formatRupiah(selectedOrder.total) }}</p>
+                            <p>Date : {{ selectedOrder.created_at }}</p>
+                        </div>
+                        <div class="rounded-md p-2 shadow-md">
+                            <h1 class="text-xl font-semibold">User Info</h1>
+                            <p>Order Status : {{ selectedOrder.order_status }}</p>
+                            <p>Pemesan : {{ selectedOrder.user.name }}</p>
+                            <p>Email : {{ selectedOrder.user.email }}</p>
+                        </div>
+                        <div class="rounded-md p-2 shadow-md">
+                            <h1 class="text-xl font-semibold">Transaction Info</h1>
+                            <p>Transaction Status : {{ selectedOrder.midtrans_transaction_status ?? '-' }}</p>
+                            <p>Transaction Id : {{ selectedOrder.midtrans_transaction_id ?? '-' }}</p>
+                            <p>Fraud Status : {{ selectedOrder.fraud_status ?? '-' }}</p>
+                        </div>
+                        <div class="rounded-md p-2 shadow-md">
+                            <h1 class="text-xl font-semibold">Shipping Info</h1>
+                            <p>Ekspedisi : {{ selectedOrder.shipping_name ?? '-' }}</p>
+                            <p>Service : {{ selectedOrder.shipping_service }}</p>
+                            <p>Cost : {{ formatRupiah(selectedOrder.shipping_cost) }}</p>
+                            <p>Etd : {{ selectedOrder.shipping_etd }}</p>
+                        </div>
                     </div>
                     <div>
-                        <p><b>Order Status : </b> {{ selectedOrder.order_status }}</p>
-                        <p><b>Pemesan :</b> {{ selectedOrder.user.name }}</p>
-                        <p><b>Email :</b> {{ selectedOrder.user.email }}</p>
+                        <table class="w-full border-collapse overflow-hidden rounded-xl shadow-md">
+                            <thead class="rounded-xl bg-gray-100 text-gray-800">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-sm font-medium">Produk</th>
+                                    <th class="px-4 py-2 text-sm font-medium">Subtotal</th>
+                                    <th class="px-4 py-2 text-sm font-medium">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y">
+                                <tr v-for="(item, index) in selectedOrder?.order_items" :key="index" class="text-center text-[14px]">
+                                    <td class="px-4 py-2 text-left text-sm">{{ item.product }}</td>
+                                    <td class="px-4 py-2 text-sm">{{ formatRupiah(item.subtotal) }}</td>
+                                    <td class="px-4 py-2 text-sm">{{ item.quantity }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div>
-                        <p><b>Transaction Status : </b> {{ selectedOrder.midtrans_transaction_status ?? '-' }}</p>
-                        <p><b>Transaction Id : </b> {{ selectedOrder.midtrans_transaction_id ?? '-' }}</p>
-                        <p><b>Fraud Status : </b> {{ selectedOrder.fraud_status ?? '-' }}</p>
-                    </div>
-                    <div>
-                        <p><b>Ekspedisi : </b> {{ selectedOrder.shipping_name ?? '-' }}</p>
-                        <p><b>Service : </b> {{ selectedOrder.shipping_service }}</p>
-                        <p><b>Cost : </b> {{ formatRupiah(selectedOrder.shipping_cost) }}</p>
-                        <p><b>Etd : </b> {{ selectedOrder.shipping_etd }}</p>
-                    </div>
-                </div>
-                <div>
-                    <table class="w-full border-collapse overflow-hidden rounded-xl shadow-md">
-                        <thead class="rounded-xl bg-gray-100 text-gray-800">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-sm font-medium">Produk</th>
-                                <th class="px-4 py-2 text-sm font-medium">Subtotal</th>
-                                <th class="px-4 py-2 text-sm font-medium">Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            <tr v-for="(item, index) in selectedOrder?.order_items" :key="index" class="text-center text-[14px]">
-                                <td class="px-4 py-2 text-left text-sm">{{ item.product }}</td>
-                                <td class="px-4 py-2 text-sm">{{ formatRupiah(item.subtotal) }}</td>
-                                <td class="px-4 py-2 text-sm">{{ item.quantity }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
                 <DialogFooter>
-                    <Button> <Printer /> </Button>
+                    <form :action="route('print.detail.order.pdf', selectedOrder?.id)" method="get" target="_blank">
+                        <Button> <Printer /> </Button>
+                    </form>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -243,7 +398,9 @@ function showOrderShipping(order: Order) {
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button> <Printer /> </Button>
+                    <form :action="route('print.shipping.order.pdf', selectedOrder?.id)" method="get" target="_blank">
+                        <Button> <Printer /> </Button>
+                    </form>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
