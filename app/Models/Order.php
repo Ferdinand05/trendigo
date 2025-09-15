@@ -23,7 +23,8 @@ class Order extends Model
         'midtrans_response',
         'fraud_status',
         'shipping_name',
-        'order_status'
+        'order_status',
+        'midtrans_snap_token'
     ];
 
 

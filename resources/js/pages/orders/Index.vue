@@ -203,7 +203,7 @@ function destroyOrder(id: number) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    <TableRow v-for="(order, index) in props.orders.data" :key="index">
+                    <TableRow v-for="(order, index) in props.orders.data" :key="order.id">
                         <TableCell>{{ index + 1 }}</TableCell>
                         <TableCell class="font-medium">
                             <Badge v-if="order.status == 'paid'" class="bg-green-600 uppercase">{{ order.status }}</Badge>

@@ -216,7 +216,7 @@ type ShippingCost = {
     etd: string;
 };
 
-const recipient_name = ref<string>('');
+const recipient_name = ref<string>(page.props.auth.user.name ?? '');
 const phone = ref<string>('');
 const address = ref<string>('');
 const province = ref<string>('');
@@ -293,7 +293,7 @@ const createCharge = async () => {
         })
         .then(function (response: any) {
             const { snapToken, clientKey } = response.data;
-
+            console.log(snapToken);
             // Load Midtrans Snap.js
             if (!document.getElementById('midtrans-script')) {
                 const script = document.createElement('script');
@@ -319,16 +319,24 @@ const createCharge = async () => {
                             });
 
                             emptyForm();
+                            router.reload({ only: ['cartProduct'] });
+                            window.location.reload();
                         }
                     },
                     onPending: function (result: any) {
                         console.log(result);
-                        Swal.fire({
-                            title: 'Kamu keluar dari pembayaran',
-                            text: 'Cek pembayaran yang belum selesai di Profil?',
-                            icon: 'question',
-                            footer: '<a href="/user/profile/orders">Cek Pesanan!</a>',
-                        });
+
+                        if (result.status_code == 201) {
+                            Swal.fire({
+                                title: 'Kamu keluar di tengah proses pembayaran',
+                                text: 'Cek pembayaran yang belum selesai di Profil?',
+                                icon: 'question',
+                                footer: '<a href="/user/profile/orders">Cek Pesanan!</a>',
+                            });
+
+                            emptyForm();
+                            window.location.reload();
+                        }
                     },
                     onError: function (result: any) {
                         console.log(result);
@@ -337,6 +345,8 @@ const createCharge = async () => {
                             text: 'Cek informasi dan pastikan data benar',
                             icon: 'question',
                         });
+
+                        emptyForm();
                     },
                     onClose: function () {
                         Swal.fire({
@@ -344,6 +354,8 @@ const createCharge = async () => {
                             text: 'Pembayaran gagal',
                             icon: 'question',
                         });
+
+                        emptyForm();
                     },
                 });
             }, 500);

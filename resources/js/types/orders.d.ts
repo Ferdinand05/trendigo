@@ -44,4 +44,5 @@ export interface Order {
     fraud_status: string | null;
     created_at: string; // format 'd-m-y H:i:s'
     order_items: OrderItem[];
+    midtrans_snap_token: string;
 }

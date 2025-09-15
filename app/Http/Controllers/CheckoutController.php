@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\OrderCreated;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -99,6 +100,10 @@ class CheckoutController extends Controller
             'shipping_etd' => $request->shipping_etd
         ]);
 
+
+        // Broadcast order baru
+        // broadcast(new OrderCreated($order));
+
         foreach ($request->items as $item) {
             OrderItem::create([
                 'order_id' => $order->id,
@@ -171,6 +176,10 @@ class CheckoutController extends Controller
 
         // Generate Snap Token
         $snapToken = Snap::getSnapToken($params);
+
+        $order->update([
+            'midtrans_snap_token' => $snapToken
+        ]);
         return response()->json([
             'snapToken' => $snapToken,
             'clientKey' => config('midtrans.client_key'),

@@ -16,6 +16,7 @@ class OrderResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'midtrans_snap_token' => $this->midtrans_snap_token,
             'order_code' => $this->order_code,
             'user_id' => $this->user_id,
             'user' => [

@@ -18,7 +18,6 @@ const scrollY = ref(0);
 
 const handleScroll = () => {
     scrollY.value = window.scrollY;
-    console.log('Scroll Y:', scrollY.value);
 };
 
 onMounted(() => {

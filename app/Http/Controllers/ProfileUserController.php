@@ -33,7 +33,8 @@ class ProfileUserController extends Controller
     {
         $order = Order::where('user_id', Auth::id())->get();
         return Inertia::render('profile/UserOrder', [
-            'orders' => OrderResource::collection($order)
+            'orders' => OrderResource::collection($order),
+            'clientKey' => config('midtrans.client_key')
         ]);
     }
 
