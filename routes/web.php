@@ -28,6 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('user/profile', [ProfileUserController::class, 'update'])->name('profile.user.save');
     Route::get('user/profile/orders', [ProfileUserController::class, 'showOrder'])->name('profile.show.order');
     Route::get('user/profile/setting', [ProfileUserController::class, 'showSetting'])->name('profile.show.setting');
+    Route::get('user/profile/password', [ProfileUserController::class, 'formPassword'])->name('profile.user.password');
     Route::get('user/profile/orders/{id}/print', [ProfileUserController::class, 'printOrder'])->name('user.print.order');
 
 

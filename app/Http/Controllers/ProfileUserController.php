@@ -42,6 +42,11 @@ class ProfileUserController extends Controller
         return Inertia::render('profile/UserSetting');
     }
 
+    public function formPassword()
+    {
+        return Inertia::render('profile/UserPassword');
+    }
+
     public function printOrder(Request $request, $id)
     {
         $order = Order::findOrFail($id);

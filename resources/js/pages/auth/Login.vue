@@ -88,8 +88,13 @@ const submit = () => {
                             Masuk
                         </Button>
                         <Button type="button" variant="outline" class="mt-3 w-full cursor-pointer">
-                            Masuk dengan Google <img width="24" height="24" src="https://img.icons8.com/fluency/48/google-logo.png" alt="google-logo"
-                        /></Button>
+                            <a :href="route('auth.redirect')">
+                                <div class="flex items-center gap-x-2">
+                                    <span>Masuk dengan Google</span>
+                                    <img width="24" height="24" src="https://img.icons8.com/fluency/48/google-logo.png" alt="google-logo" />
+                                </div>
+                            </a>
+                        </Button>
                     </div>
                 </div>
 

@@ -51,6 +51,9 @@ const fillModal = (order: Order) => {
             <div>
                 <HeadingSmall title="Pesanan" description="Laporan pesanan anda"></HeadingSmall>
             </div>
+            <div v-if="orders.data.length == 0" class="max-w-xl rounded-md border p-2 text-gray-700 dark:text-gray-200">
+                <h1>Anda belum memesan apapaun. <a class="text-blue-500 hover:underline" :href="route('home') + '#product'">Belanja sekarang!</a></h1>
+            </div>
             <div class="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
                 <div v-for="(order, index) in props.orders.data" :key="index">
                     <Card class="gap-3 dark:text-gray-300">
