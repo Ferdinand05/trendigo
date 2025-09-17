@@ -57,47 +57,46 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/checkout/create-charge', [CheckoutController::class, 'createCharge'])->name('create.charge');
 
 
+    // only admin / super admin can access
+    Route::middleware('isAdmin')->group(function () {
+
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // products
+        Route::resource('/products', ProductController::class);
+        Route::post('/products/update-status', [ProductController::class, 'updateStatus'])->name('product.update.status');
+
+        // dashboard users route
+        Route::get('users', [UserController::class, 'index'])->name('users.index');
+        Route::post('users', [UserController::class, 'store'])->name('users.store');
+        Route::delete('users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+        Route::put('users/{id}', [UserController::class, 'update'])->name('users.update');
 
 
-
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // products
-    Route::resource('/products', ProductController::class);
-    Route::post('/products/update-status', [ProductController::class, 'updateStatus'])->name('product.update.status');
-
-    // dashboard users route
-    Route::get('users', [UserController::class, 'index'])->name('users.index');
-    Route::post('users', [UserController::class, 'store'])->name('users.store');
-    Route::delete('users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
-    Route::put('users/{id}', [UserController::class, 'update'])->name('users.update');
+        // dashboard roles
+        Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
+        Route::post('roles', [RoleController::class, 'store'])->name('roles.store');
+        Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+        Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
 
 
-    // dashboard roles
-    Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
-    Route::post('roles', [RoleController::class, 'store'])->name('roles.store');
-    Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
-    Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+        //dashboard category
+        Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
+        Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
+        Route::put('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+        Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
 
+        // dashboard Order
+        Route::get('dashboard/orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::post('dashboard/orders/order-done', [OrderController::class, 'orderDone'])->name('order.done');
+        Route::delete('dashboard/orders/{id}/destroy', [OrderController::class, 'destroy'])->name('order.destroy');
 
-
-    //dashboard category
-    Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
-    Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
-    Route::put('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
-    Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
-
-
-    // dashboard Order
-    Route::get('dashboard/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::post('dashboard/orders/order-done', [OrderController::class, 'orderDone'])->name('order.done');
-    Route::delete('dashboard/orders/{id}/destroy', [OrderController::class, 'destroy'])->name('order.destroy');
-
-    // print order
-    Route::get('/orders/{id}/print/pdf', [OrderController::class, 'printDetailOrder'])->name('print.detail.order.pdf');
-    Route::get('/orders/shipping-order/{id}/print/pdf', [OrderController::class, 'printShippingOrder'])->name('print.shipping.order.pdf');
-    Route::get('/orders/print/pdf', [OrderController::class, 'printOrdersPdf'])->name('print.orders.pdf');
+        // print order
+        Route::get('/orders/{id}/print/pdf', [OrderController::class, 'printDetailOrder'])->name('print.detail.order.pdf');
+        Route::get('/orders/shipping-order/{id}/print/pdf', [OrderController::class, 'printShippingOrder'])->name('print.shipping.order.pdf');
+        Route::get('/orders/print/pdf', [OrderController::class, 'printOrdersPdf'])->name('print.orders.pdf');
+    });
 });
 
 
