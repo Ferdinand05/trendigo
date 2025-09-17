@@ -9,7 +9,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import Separator from '@/components/ui/separator/Separator.vue';
 import { Categories } from '@/types/categories';
 import { ProductInterface } from '@/types/products';
-import { Link, useForm } from '@inertiajs/vue3';
+import { Link, useForm, usePage } from '@inertiajs/vue3';
 import { watchOnce } from '@vueuse/core';
 import { Plus, Rocket } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -70,6 +70,9 @@ function addToCart(id: number | null) {
 function formatRupiah(value: number) {
     return new Intl.NumberFormat('id-ID').format(value);
 }
+
+const page = usePage();
+const location = page.props.ziggy.location;
 </script>
 
 <template>
@@ -79,8 +82,36 @@ function formatRupiah(value: number) {
     <div class="w-full">
         <img src="/img/pattern/waves1.svg" alt="" class="absolute w-full" />
     </div>
-    <section class="mx-auto max-w-7xl px-6 py-14 pt-40 font-poppins dark:text-gray-200">
-        <div class="flex flex-col justify-around md:flex-row md:gap-x-14">
+
+    <section class="mx-auto max-w-7xl overflow-hidden px-6 py-14 pt-40 font-poppins dark:text-gray-200">
+        <!-- share/bagikan -->
+        <div class="flex max-w-7xl flex-col items-end justify-end">
+            <p class="text-sm text-gray-600">Bagikan</p>
+            <ul class="share-buttons flex gap-x-1" data-source="simplesharingbuttons.com">
+                <li>
+                    <a
+                        :href="'https://www.facebook.com/sharer/sharer.php?u=' + location + '=&quote=Trendigo%20Produk'"
+                        title="Share  on Facebook"
+                        target="_blank"
+                    >
+                        <img src="https://img.icons8.com/?size=100&id=13912&format=png&color=000000" width="38" height="38" alt="" />
+                    </a>
+                </li>
+                <li>
+                    <a :href="'https://x.com/intent/tweet?source=' + location + '&text=Trendigo%20Produk:' + location" target="_blank" title="Tweet"
+                        ><img alt="Tweet" src="https://img.icons8.com/?size=100&id=yoQabS8l0qpr&format=png&color=000000" width="38" height="38"
+                    /></a>
+                </li>
+                <li>
+                    <a :href="'https://pinterest.com/pin/create/button/?url=' + location + '&description='" target="_blank" title="Pin it"
+                        ><img alt="Pin it" src="https://img.icons8.com/?size=100&id=63676&format=png&color=000000" width="38" height="38"
+                    /></a>
+                </li>
+            </ul>
+        </div>
+        <!-- end share/bagikan -->
+
+        <div class="flex flex-col justify-around pt-10 md:flex-row md:gap-x-14">
             <!-- product image -->
             <div class="max-w-[550px]">
                 <Carousel class="relative rounded-md border py-5 shadow" @init-api="(val) => (emblaMainApi = val)">
