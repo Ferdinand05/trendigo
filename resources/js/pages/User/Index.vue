@@ -25,13 +25,21 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import Pagination from '@/components/ui/pagination/Pagination.vue';
+import PaginationContent from '@/components/ui/pagination/PaginationContent.vue';
+import PaginationItem from '@/components/ui/pagination/PaginationItem.vue';
+import PaginationNext from '@/components/ui/pagination/PaginationNext.vue';
+import PaginationPrevious from '@/components/ui/pagination/PaginationPrevious.vue';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import SelectLabel from '@/components/ui/select/SelectLabel.vue';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/vue3';
-import { Edit, Trash } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { PaginationLinks, PaginationMeta } from '@/types/pagination';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { watchDebounced } from '@vueuse/core';
+import { Edit, FilterIcon, Search, Trash } from 'lucide-vue-next';
+import { ref, watch } from 'vue';
 import { Toaster, toast } from 'vue-sonner';
 import 'vue-sonner/style.css';
 const breadcrumb: BreadcrumbItem[] = [
@@ -52,11 +60,14 @@ type UserType = {
 type RoleType = {
     id: number;
     role_name: string;
+    slug: string;
 };
 
-defineProps<{
+const props = defineProps<{
     users: {
         data: UserType[];
+        meta: PaginationMeta;
+        links: PaginationLinks;
     };
     roles: RoleType[];
 }>();
@@ -147,6 +158,45 @@ const updateUser = () => {
         },
     });
 };
+
+const selectedRole = ref<string | null>(null);
+const search = ref('');
+function filterRole(val: string | null) {
+    router.get(
+        route('users.index'),
+        {
+            role: val,
+        },
+        {
+            preserveScroll: true,
+            preserveState: true,
+        },
+    );
+}
+watch(selectedRole, (newRole: string | null) => {
+    filterRole(newRole);
+    console.log(newRole);
+});
+
+watchDebounced(
+    search,
+    (value) => {
+        router.get(
+            route('users.index'),
+            {
+                search: value,
+            },
+            {
+                preserveScroll: true,
+                preserveState: true,
+            },
+        );
+    },
+    {
+        debounce: 600,
+        maxWait: 1200,
+    },
+);
 </script>
 
 <template>
@@ -154,63 +204,100 @@ const updateUser = () => {
     <AppLayout :breadcrumbs="breadcrumb">
         <Toaster />
         <div class="p-10">
-            <Dialog>
-                <DialogTrigger as-child>
-                    <div class="mb-5 flex justify-end">
-                        <Button @click.prevent="formCreateData.clearErrors()"> Create new User </Button>
+            <!-- select and input search -->
+            <div class="flex items-end justify-between">
+                <div class="flex w-full flex-col gap-y-2">
+                    <div>
+                        <Select v-model="selectedRole">
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a role"> <FilterIcon />Filter </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Role</SelectLabel>
+                                    <SelectItem value=" ">All</SelectItem>
+                                    <SelectItem v-for="(r, i) in props.roles" :value="r.slug" :key="i">
+                                        {{ r.role_name }}
+                                    </SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                     </div>
-                </DialogTrigger>
-                <DialogContent class="sm:max-w-[500px]">
-                    <DialogHeader>
-                        <DialogTitle>Create User</DialogTitle>
-                        <DialogDescription> Make new user here. Click Create when you're done. </DialogDescription>
-                    </DialogHeader>
-                    <form @submit.prevent="createUser()">
-                        <div class="grid gap-4 py-4">
-                            <div class="grid grid-cols-4 items-center gap-4">
-                                <Label for="name" class="text-right"> Name </Label>
-                                <Input id="name" v-model="formCreateData.name" class="col-span-3" />
-                            </div>
-                            <InputError :message="formCreateData.errors.name"></InputError>
-                            <div class="grid grid-cols-4 items-center gap-4">
-                                <Label for="email" class="text-right">Email </Label>
-                                <Input id="email" v-model="formCreateData.email" type="email" class="col-span-3" />
-                            </div>
-                            <InputError :message="formCreateData.errors.email"></InputError>
-                            <div class="grid grid-cols-4 items-center gap-4">
-                                <Label for="role">Select role</Label>
-                                <Select id="role" v-model="formCreateData.role_id">
-                                    <SelectTrigger class="w-[333px]">
-                                        <SelectValue placeholder="Select a role" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectItem v-for="role in roles" :key="role.id" :value="role.id">
-                                                {{ role.role_name }}
-                                            </SelectItem>
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <InputError :message="formCreateData.errors.role_id" />
 
-                            <div class="grid grid-cols-4 items-center gap-4">
-                                <Label for="password" class="text-right">Password </Label>
-                                <Input id="password" v-model="formCreateData.password" type="password" class="col-span-3" />
-                            </div>
-                            <InputError :message="formCreateData.errors.password"></InputError>
+                    <div class="relative mb-2 w-full max-w-sm items-center md:max-w-md">
+                        <Input v-model="search" id="search" type="text" placeholder="Search..." class="pl-10" />
+                        <span class="absolute inset-y-0 start-0 flex items-center justify-center px-2">
+                            <Search class="size-5 text-muted-foreground" />
+                        </span>
+                    </div>
+                </div>
 
-                            <div class="grid grid-cols-4 items-center gap-4">
-                                <Label for="password_confirmation" class="text-left">Password Confirmation </Label>
-                                <Input id="password_confirmation" v-model="formCreateData.password_confirmation" type="password" class="col-span-3" />
+                <div>
+                    <Dialog>
+                        <DialogTrigger as-child>
+                            <div class="mb-5 flex justify-end">
+                                <Button @click.prevent="formCreateData.clearErrors()"> Create new User </Button>
                             </div>
-                        </div>
-                        <DialogFooter>
-                            <Button type="submit" :disabled="formCreateData.processing"> Create new </Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
+                        </DialogTrigger>
+                        <DialogContent class="sm:max-w-[500px]">
+                            <DialogHeader>
+                                <DialogTitle>Create User</DialogTitle>
+                                <DialogDescription> Make new user here. Click Create when you're done. </DialogDescription>
+                            </DialogHeader>
+                            <form @submit.prevent="createUser()">
+                                <div class="grid gap-4 py-4">
+                                    <div class="grid grid-cols-4 items-center gap-4">
+                                        <Label for="name" class="text-right"> Name </Label>
+                                        <Input id="name" v-model="formCreateData.name" class="col-span-3" />
+                                    </div>
+                                    <InputError :message="formCreateData.errors.name"></InputError>
+                                    <div class="grid grid-cols-4 items-center gap-4">
+                                        <Label for="email" class="text-right">Email </Label>
+                                        <Input id="email" v-model="formCreateData.email" type="email" class="col-span-3" />
+                                    </div>
+                                    <InputError :message="formCreateData.errors.email"></InputError>
+                                    <div class="grid grid-cols-4 items-center gap-4">
+                                        <Label for="role">Select role</Label>
+                                        <Select id="role" v-model="formCreateData.role_id">
+                                            <SelectTrigger class="w-[333px]">
+                                                <SelectValue placeholder="Select a role" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectGroup>
+                                                    <SelectItem v-for="role in roles" :key="role.id" :value="role.id">
+                                                        {{ role.role_name }}
+                                                    </SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <InputError :message="formCreateData.errors.role_id" />
+
+                                    <div class="grid grid-cols-4 items-center gap-4">
+                                        <Label for="password" class="text-right">Password </Label>
+                                        <Input id="password" v-model="formCreateData.password" type="password" class="col-span-3" />
+                                    </div>
+                                    <InputError :message="formCreateData.errors.password"></InputError>
+
+                                    <div class="grid grid-cols-4 items-center gap-4">
+                                        <Label for="password_confirmation" class="text-left">Password Confirmation </Label>
+                                        <Input
+                                            id="password_confirmation"
+                                            v-model="formCreateData.password_confirmation"
+                                            type="password"
+                                            class="col-span-3"
+                                        />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button type="submit" :disabled="formCreateData.processing"> Create new </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+                </div>
+            </div>
+
             <Table>
                 <TableCaption>A list of Users</TableCaption>
                 <TableHeader>
@@ -264,6 +351,40 @@ const updateUser = () => {
                     </TableRow>
                 </TableBody>
             </Table>
+
+            <div class="mt-2">
+                <div class="text-sm font-medium text-gray-600">
+                    Showing {{ props.users.meta.per_page }} from {{ props.users.meta.from }} of {{ props.users.meta.total }}
+                </div>
+                <Pagination
+                    :v-slot="props.users.meta.current_page"
+                    :items-per-page="props.users.meta.per_page"
+                    :total="props.users.meta.total"
+                    :default-page="props.users.meta.current_page"
+                >
+                    <PaginationContent :v-slot="props.users.meta.links">
+                        <Button variant="link" :disabled="props.users.links.prev == null">
+                            <Link :href="props.users.links.prev ?? ''">
+                                <PaginationPrevious />
+                            </Link>
+                        </Button>
+
+                        <template v-for="(item, index) in props.users.meta.links" :key="index">
+                            <PaginationItem v-if="!isNaN(Number(item.label))" :value="props.users.meta.current_page" :is-active="item.active">
+                                <Link :href="item.url ?? ''">
+                                    {{ item.label }}
+                                </Link>
+                            </PaginationItem>
+                        </template>
+
+                        <Button variant="link" :disabled="props.users.links.next == null">
+                            <Link :href="props.users.links.next ?? ''">
+                                <PaginationNext> </PaginationNext>
+                            </Link>
+                        </Button>
+                    </PaginationContent>
+                </Pagination>
+            </div>
 
             <!-- modal dialog edit -->
             <Dialog v-model:open="modalDialogEdit">

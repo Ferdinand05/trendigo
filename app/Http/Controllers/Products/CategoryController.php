@@ -12,10 +12,18 @@ use Illuminate\Support\Facades\Session;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $categories = CategoryResource::collection(Category::with('products')->get());
-        return Inertia::render('categories/Index', ['categories' => $categories]);
+
+        $categories = Category::query()
+            ->when($request->search, function ($query, $keyword) {
+                $query
+                    ->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('description', 'like', "%{$keyword}%");
+            })
+            ->paginate(10)
+            ->withQueryString();
+        return Inertia::render('categories/Index', ['categories' => CategoryResource::collection($categories)]);
     }
 
     public function store(Request $request)

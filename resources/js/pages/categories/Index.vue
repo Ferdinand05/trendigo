@@ -19,6 +19,11 @@ import DialogTitle from '@/components/ui/dialog/DialogTitle.vue';
 import DialogTrigger from '@/components/ui/dialog/DialogTrigger.vue';
 import Input from '@/components/ui/input/Input.vue';
 import Label from '@/components/ui/label/Label.vue';
+import Pagination from '@/components/ui/pagination/Pagination.vue';
+import PaginationContent from '@/components/ui/pagination/PaginationContent.vue';
+import PaginationItem from '@/components/ui/pagination/PaginationItem.vue';
+import PaginationNext from '@/components/ui/pagination/PaginationNext.vue';
+import PaginationPrevious from '@/components/ui/pagination/PaginationPrevious.vue';
 import Table from '@/components/ui/table/Table.vue';
 import TableBody from '@/components/ui/table/TableBody.vue';
 import TableCaption from '@/components/ui/table/TableCaption.vue';
@@ -33,8 +38,10 @@ import TooltipProvider from '@/components/ui/tooltip/TooltipProvider.vue';
 import TooltipTrigger from '@/components/ui/tooltip/TooltipTrigger.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/vue3';
-import { Edit, Plus, Trash } from 'lucide-vue-next';
+import { PaginationLinks, PaginationMeta } from '@/types/pagination';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { watchDebounced } from '@vueuse/core';
+import { Edit, Plus, Search, Trash } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { Toaster, toast } from 'vue-sonner';
 import 'vue-sonner/style.css';
@@ -58,6 +65,8 @@ interface Categories {
 const props = defineProps<{
     categories: {
         data: Categories[];
+        links: PaginationLinks;
+        meta: PaginationMeta;
     };
 }>();
 
@@ -135,6 +144,20 @@ const destroyCategory = (id: number) => {
         },
     });
 };
+
+const search = ref('');
+watchDebounced(search, (keyword) => {
+    router.get(
+        route('categories.index'),
+        {
+            search: keyword,
+        },
+        {
+            preserveScroll: true,
+            preserveState: true,
+        },
+    );
+});
 </script>
 
 <template>
@@ -143,35 +166,44 @@ const destroyCategory = (id: number) => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <Toaster />
         <div class="p-10">
-            <div class="mb-3 flex justify-end">
-                <Dialog>
-                    <DialogTrigger>
-                        <Button @click.prevent="formCreate.resetAndClearErrors()"><Plus /> Create new Category</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Create a new Category</DialogTitle>
-                            <DialogDescription>Create new category for your products</DialogDescription>
-                        </DialogHeader>
-                        <form @submit.prevent="handleSubmit()">
-                            <div class="space-y-4">
-                                <div class="space-y-2">
-                                    <Label for="name">Category name</Label>
-                                    <Input id="name" v-model="formCreate.name"></Input>
-                                    <InputError :message="formCreate.errors.name" />
+            <div class="flex justify-between">
+                <div class="relative mb-2 w-full max-w-sm items-center md:max-w-md">
+                    <Input v-model="search" id="search" type="text" placeholder="Search..." class="pl-10" />
+                    <span class="absolute inset-y-0 start-0 flex items-center justify-center px-2">
+                        <Search class="size-5 text-muted-foreground" />
+                    </span>
+                </div>
+
+                <div class="mb-3 flex justify-end">
+                    <Dialog>
+                        <DialogTrigger>
+                            <Button @click.prevent="formCreate.resetAndClearErrors()"><Plus /> Create new Category</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Create a new Category</DialogTitle>
+                                <DialogDescription>Create new category for your products</DialogDescription>
+                            </DialogHeader>
+                            <form @submit.prevent="handleSubmit()">
+                                <div class="space-y-4">
+                                    <div class="space-y-2">
+                                        <Label for="name">Category name</Label>
+                                        <Input id="name" v-model="formCreate.name"></Input>
+                                        <InputError :message="formCreate.errors.name" />
+                                    </div>
+                                    <div class="space-y-2">
+                                        <Label for="desc">Description</Label>
+                                        <Textarea id="desc" v-model="formCreate.description" />
+                                        <InputError :message="formCreate.errors.description" />
+                                    </div>
                                 </div>
-                                <div class="space-y-2">
-                                    <Label for="desc">Description</Label>
-                                    <Textarea id="desc" v-model="formCreate.description" />
-                                    <InputError :message="formCreate.errors.description" />
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button type="submit" :disabled="formCreate.processing">Create Category</Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+                                <DialogFooter>
+                                    <Button type="submit" :disabled="formCreate.processing">Create Category</Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
             <Table>
                 <TableCaption>A list of your recent Categories.</TableCaption>
@@ -225,6 +257,42 @@ const destroyCategory = (id: number) => {
                     </TableRow>
                 </TableBody>
             </Table>
+
+            <!-- Pagination -->
+            <div class="mt-2">
+                <div class="text-sm text-gray-600">
+                    Showing {{ props.categories.data.length }} from {{ props.categories.meta.from }} of {{ props.categories.meta.total }}
+                </div>
+                <Pagination
+                    :v-slot="props.categories.meta.current_page"
+                    :items-per-page="props.categories.meta.per_page"
+                    :total="props.categories.meta.total"
+                    :default-page="props.categories.meta.current_page"
+                >
+                    <PaginationContent :v-slot="props.categories.meta.links">
+                        <Button variant="link" :disabled="props.categories.links.prev == null">
+                            <Link :href="props.categories.links.prev ?? ''">
+                                <PaginationPrevious />
+                            </Link>
+                        </Button>
+
+                        <template v-for="(item, index) in props.categories.meta.links" :key="index">
+                            <PaginationItem v-if="!isNaN(Number(item.label))" :value="props.categories.meta.current_page" :is-active="item.active">
+                                <Link :href="item.url ?? ''">
+                                    {{ item.label }}
+                                </Link>
+                            </PaginationItem>
+                        </template>
+
+                        <Button variant="link" :disabled="props.categories.links.next == null">
+                            <Link :href="props.categories.links.next ?? ''">
+                                <PaginationNext> </PaginationNext>
+                            </Link>
+                        </Button>
+                    </PaginationContent>
+                </Pagination>
+            </div>
+            <!-- END Pagination -->
 
             <!-- modal edit/update -->
             <Dialog v-model:open="openModalDialog">
