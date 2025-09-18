@@ -25,7 +25,7 @@ import { Order } from '@/types/orders';
 import { PaginationLinks, PaginationMeta } from '@/types/pagination';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { watchDebounced } from '@vueuse/core';
-import { Check, EllipsisVertical, FilterIcon, MapPin, Printer, Search, ShoppingCart, Trash } from 'lucide-vue-next';
+import { Check, Columns2, EllipsisVertical, FilterIcon, MapPin, Printer, Search, ShoppingCart, Trash } from 'lucide-vue-next';
 import Swal from 'sweetalert2';
 import { ref, watch } from 'vue';
 const breadcrumbs: BreadcrumbItem[] = [
@@ -151,6 +151,20 @@ function destroyOrder(id: number) {
         }
     });
 }
+
+const selectedColumn = ref('');
+watch(selectedColumn, (column) => {
+    router.get(
+        route('orders.index'),
+        {
+            col: column,
+        },
+        {
+            preserveScroll: true,
+            preserveState: true,
+        },
+    );
+});
 </script>
 
 <template>
@@ -158,19 +172,37 @@ function destroyOrder(id: number) {
     <AppLayout :breadcrumbs="breadcrumbs">
         <section class="p-10">
             <div class="mb-2 flex justify-between">
-                <Select id="category" v-model="selectedStatus">
-                    <SelectTrigger>
-                        <SelectValue> <FilterIcon /> Filter </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectLabel>Status</SelectLabel>
-                            <SelectItem value=" "> <Badge variant="outline">All</Badge> </SelectItem>
-                            <SelectItem value="pending"> <Badge variant="secondary">Pending</Badge> </SelectItem>
-                            <SelectItem value="paid"> <Badge class="bg-green-600">Paid</Badge> </SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
+                <div>
+                    <Select id="status" v-model="selectedStatus">
+                        <SelectTrigger>
+                            <SelectValue> <FilterIcon /> Filter </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectLabel>Status</SelectLabel>
+                                <SelectItem value=" "> <Badge variant="outline">All</Badge> </SelectItem>
+                                <SelectItem value="pending"> <Badge variant="secondary">Pending</Badge> </SelectItem>
+                                <SelectItem value="paid"> <Badge class="bg-green-600">Paid</Badge> </SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div>
+                    <Select id="orderby" v-model="selectedColumn">
+                        <SelectTrigger>
+                            <SelectValue> <Columns2 /> Order By </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectLabel>Column</SelectLabel>
+                                <SelectItem value="status"> Status </SelectItem>
+                                <SelectItem value="total"> Total </SelectItem>
+                                <SelectItem value="order_status"> Order Status </SelectItem>
+                                <SelectItem value="created_at"> Date </SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
             <!-- search and print laporan -->
             <div class="flex items-center justify-between">

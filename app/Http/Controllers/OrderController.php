@@ -32,6 +32,9 @@ class OrderController extends Controller
                         $uq->where('name', 'like', "{$keyword}%");
                     });
             })
+            ->when($request->col, function ($query, $column) {
+                $query->orderBy($column, 'asc');
+            })
             ->paginate(10)
             ->withQueryString();
 
