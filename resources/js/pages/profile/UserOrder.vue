@@ -81,9 +81,11 @@ function continuePay(snap_token: string) {
             </div>
             <div class="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
                 <div v-for="(order, index) in props.orders.data" :key="index">
-                    <Card class="gap-3 dark:text-gray-300">
+                    <Card class="gap-3 dark:border dark:border-blue-900 dark:text-gray-300">
                         <CardHeader>
-                            <div class="rounded-xl bg-gradient-to-r from-blue-300 via-blue-400 to-blue-800 p-2.5 dark:bg-blue-800">
+                            <div
+                                class="rounded-xl bg-gradient-to-r from-blue-300 via-blue-400 to-blue-800 p-2.5 dark:bg-blue-800 dark:from-blue-500 dark:via-blue-600 dark:to-blue-900"
+                            >
                                 <small>Kode Order</small>
                                 <CardTitle>#{{ order.order_code }}</CardTitle>
                                 <CardDescription class="mt-2">
@@ -147,7 +149,7 @@ function continuePay(snap_token: string) {
                 </div>
                 <div>
                     <table class="w-full border-collapse overflow-hidden rounded-lg text-sm shadow-sm">
-                        <thead class="bg-gray-100 text-gray-700">
+                        <thead class="bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300">
                             <tr>
                                 <th class="px-4 py-2 text-left font-medium">Produk</th>
                                 <th class="px-4 py-2 font-medium">Harga</th>
@@ -156,20 +158,24 @@ function continuePay(snap_token: string) {
                         </thead>
 
                         <tbody class="divide-y">
-                            <tr v-for="(item, index) in selectedOrder?.order_items" :key="index" class="hover:bg-gray-50">
+                            <tr
+                                v-for="(item, index) in selectedOrder?.order_items"
+                                :key="index"
+                                class="hover:bg-gray-50 dark:bg-gray-600 dark:hover:bg-gray-700"
+                            >
                                 <td class="px-4 py-2 text-left">{{ item.product }}</td>
                                 <td class="px-4 py-2">{{ formatRupiah(item.price) }}</td>
                                 <td class="px-4 py-2 text-center">{{ item.quantity }}</td>
                             </tr>
 
-                            <tr class="bg-gray-50">
+                            <tr class="bg-gray-50 dark:bg-gray-600 dark:hover:bg-gray-700">
                                 <td class="px-4 py-2 text-left font-light">(Pengiriman) {{ selectedOrder?.shipping_service }}</td>
                                 <td class="px-4 py-2">{{ formatRupiah(selectedOrder?.shipping_cost ?? 0) }}</td>
                                 <td class="px-4 py-2 text-center">1</td>
                             </tr>
                         </tbody>
 
-                        <tfoot class="bg-gray-100 font-semibold text-gray-800">
+                        <tfoot class="bg-gray-100 font-semibold text-gray-800 dark:bg-gray-600 dark:text-gray-300">
                             <tr>
                                 <td colspan="2" class="px-4 py-2 text-right">Total</td>
                                 <td class="px-4 py-2 text-center">
@@ -181,7 +187,7 @@ function continuePay(snap_token: string) {
                 </div>
             </div>
             <DialogFooter class="flex items-center justify-between">
-                <div class="w-full text-sm text-gray-600">{{ selectedOrder?.created_at }}</div>
+                <div class="w-full text-sm text-gray-600 dark:text-gray-400">{{ selectedOrder?.created_at }}</div>
                 <DialogClose class="">
                     <Button type="submit"> Tutup </Button>
                 </DialogClose>

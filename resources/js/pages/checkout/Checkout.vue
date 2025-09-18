@@ -311,6 +311,7 @@ const createCharge = async () => {
                         console.log('success', result);
 
                         if (result.status_code == 200) {
+                            emptyForm();
                             Swal.fire({
                                 title: 'Pembayaran berhasil!',
                                 text: 'Pesanan akan segera di proses. Cek alur pesanan di profile.',
@@ -318,7 +319,6 @@ const createCharge = async () => {
                                 footer: '<a href="/user/profile/orders">Cek Pesanan!</a>',
                             });
 
-                            emptyForm();
                             router.reload({ only: ['cartProduct'] });
                             window.location.reload();
                         }
@@ -327,6 +327,8 @@ const createCharge = async () => {
                         console.log(result);
 
                         if (result.status_code == 201) {
+                            emptyForm();
+
                             Swal.fire({
                                 title: 'Kamu keluar di tengah proses pembayaran',
                                 text: 'Cek pembayaran yang belum selesai di Profil?',
@@ -334,28 +336,25 @@ const createCharge = async () => {
                                 footer: '<a href="/user/profile/orders">Cek Pesanan!</a>',
                             });
 
-                            emptyForm();
-                            window.location.reload();
+                            // window.location.reload();
                         }
                     },
                     onError: function (result: any) {
                         console.log(result);
+                        emptyForm();
                         Swal.fire({
                             title: 'Pembayaran gagal?',
                             text: 'Cek informasi dan pastikan data benar',
                             icon: 'question',
                         });
-
-                        emptyForm();
                     },
                     onClose: function () {
+                        emptyForm();
                         Swal.fire({
                             title: 'Kamu menutup pembayaran',
                             text: 'Pembayaran gagal',
                             icon: 'question',
                         });
-
-                        emptyForm();
                     },
                 });
             }, 500);
@@ -624,7 +623,7 @@ function emptyForm() {
                         </div>
 
                         <div class="mt-3 flex items-center justify-center">
-                            <Button type="submit" class="hover:cursor-pointer" :disabled="disableButtonCheckout">
+                            <Button type="submit" class="hover:cursor-pointer dark:bg-blue-800 dark:text-gray-300" :disabled="disableButtonCheckout">
                                 <LoaderCircle v-if="disableButtonCheckout" class="h-4 w-4 animate-spin" />
                                 Bayar Sekarang
                             </Button>

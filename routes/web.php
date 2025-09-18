@@ -65,6 +65,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // products
         Route::resource('/products', ProductController::class);
         Route::post('/products/update-status', [ProductController::class, 'updateStatus'])->name('product.update.status');
+        Route::get('/products/print/pdf', [ProductController::class, 'print'])->name('print.products');
 
         // dashboard users route
         Route::get('users', [UserController::class, 'index'])->name('users.index');

@@ -37,7 +37,7 @@ const page = usePage();
                     <Link :href="route('profile.user.password')" prefetch="hover" class="w-full text-left">Password</Link>
                 </Button>
                 <Button variant="ghost" class="w-full justify-start hover:cursor-pointer">
-                    <Link :href="route('profile.show.setting')" class="w-full text-left" prefetch="hover">Pengaturan</Link>
+                    <Link :href="route('profile.show.setting')" class="w-full text-left" prefetch="hover">Tampilan</Link>
                 </Button>
             </nav>
         </aside>

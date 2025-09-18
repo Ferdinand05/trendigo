@@ -3,9 +3,8 @@ import NavMain from '@/components/NavMain.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, ListOrderedIcon, Package, PackageSearch, Settings2, Shield, Users } from 'lucide-vue-next';
+import { LayoutGrid, ListOrderedIcon, Package, PackageSearch, Shield, Users } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
-import NavFooter from './NavFooter.vue';
 import NavUser from './NavUser.vue';
 const mainNavItems: NavItem[] = [
     {
@@ -49,13 +48,13 @@ const OrderNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Store Setting',
-        href: '/settings/shop',
-        icon: Settings2,
-    },
-];
+// const footerNavItems: NavItem[] = [
+//     {
+//         title: 'Store Setting',
+//         href: '/settings/shop',
+//         icon: Settings2,
+//     },
+// ];
 </script>
 
 <template>
@@ -80,7 +79,7 @@ const footerNavItems: NavItem[] = [
         </SidebarContent>
 
         <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
+            <!-- <NavFooter :items="footerNavItems" /> -->
             <NavUser />
         </SidebarFooter>
     </Sidebar>

@@ -117,7 +117,7 @@ function deleteCartItem(id: number) {
                                 @click.prevent="reduceQuantity(cart.id)"
                                 size="icon"
                                 variant="outline"
-                                class="size-7 rounded-full border-blue-400 text-blue-500 hover:cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900"
+                                class="size-7 rounded-full border-blue-400 text-blue-500 hover:cursor-pointer hover:bg-blue-50 dark:border dark:border-blue-800 dark:hover:bg-blue-900"
                             >
                                 <Minus />
                             </Button>
