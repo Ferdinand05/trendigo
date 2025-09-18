@@ -111,7 +111,7 @@
         <div class="company-info">
             <h1>Trendigo</h1>
             <p>Jl. Jauh No.31, Larangan, Cilegud, Kota Tangerang Selatan</p>
-            <p>Tanggal Cetak: {{ \Carbon\Carbon::now()->format('d-m-Y H:i') }}</p>
+            <p>Tanggal Cetak: {{ \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d-m-Y H:i') }}</p>
         </div>
     </div>
 
