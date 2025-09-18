@@ -38,7 +38,7 @@ import { type BreadcrumbItem } from '@/types';
 import { PaginationLinks, PaginationMeta } from '@/types/pagination';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { watchDebounced } from '@vueuse/core';
-import { Clock, Edit, EyeIcon, FilterIcon, Plus, PrinterIcon, Search, ToggleLeft, ToggleRight, Trash, Trash2 } from 'lucide-vue-next';
+import { Clock, Edit, EyeIcon, FilterIcon, Plus, Printer, Search, ToggleLeft, ToggleRight, Trash, Trash2 } from 'lucide-vue-next';
 import { reactive, ref, watch } from 'vue';
 import { Toaster, toast } from 'vue-sonner';
 import 'vue-sonner/style.css';
@@ -232,7 +232,9 @@ function searchKeyword(keyword: string | null) {
                     </span>
                 </div>
                 <div>
-                    <Button type="button" variant="outline" class="cursor-pointer"> <PrinterIcon /> Report </Button>
+                    <form :action="route('print.products')" method="get" target="_blank">
+                        <Button type="submit" class="hover:cursor-pointer">Export PDF <Printer /></Button>
+                    </form>
                 </div>
             </div>
             <Table>

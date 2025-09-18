@@ -7,6 +7,7 @@ use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -18,6 +19,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+
 
         $users = User::query()
             ->when($request->role, function ($query, $role) {

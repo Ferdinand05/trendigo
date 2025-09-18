@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductResource;
 use App\Models\ProductImages;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 
@@ -206,5 +207,15 @@ class ProductController extends Controller
             ]);
 
         Session::flash('message', 'Product status has been updated');
+    }
+
+
+    public function print()
+    {
+        $products = Product::with('category')->orderBy('stock', 'desc')->get();
+
+        $pdf = Pdf::loadView('pdf.products', ['products' => $products]);
+
+        return $pdf->download('products.pdf');
     }
 }
