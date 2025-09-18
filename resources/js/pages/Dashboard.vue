@@ -17,20 +17,10 @@ const props = defineProps<{
     totalProduct: number;
     totalRevenue: number;
     percentage: number;
+    chartData: [];
 }>();
 
-const data = [
-    { name: 'Jan', total: Math.floor(Math.random() * 2000) + 500, predicted: Math.floor(Math.random() * 2000) + 500 },
-    { name: 'Feb', total: Math.floor(Math.random() * 2000) + 500, predicted: Math.floor(Math.random() * 2000) + 500 },
-    { name: 'Mar', total: Math.floor(Math.random() * 2000) + 500, predicted: Math.floor(Math.random() * 2000) + 500 },
-    { name: 'Apr', total: Math.floor(Math.random() * 2000) + 500, predicted: Math.floor(Math.random() * 2000) + 500 },
-    { name: 'May', total: Math.floor(Math.random() * 2000) + 500, predicted: Math.floor(Math.random() * 2000) + 500 },
-    { name: 'Jun', total: Math.floor(Math.random() * 2000) + 500, predicted: Math.floor(Math.random() * 2000) + 500 },
-    { name: 'Jul', total: Math.floor(Math.random() * 2000) + 500, predicted: Math.floor(Math.random() * 2000) + 500 },
-    { name: 'Agu', total: Math.floor(Math.random() * 2000) + 500, predicted: Math.floor(Math.random() * 2000) + 500 },
-    { name: 'Sept', total: Math.floor(Math.random() * 2000) + 500, predicted: Math.floor(Math.random() * 2000) + 500 },
-    { name: 'Okt', total: Math.floor(Math.random() * 2000) + 500, predicted: Math.floor(Math.random() * 2000) + 500 },
-];
+const data = props.chartData;
 
 function formatRupiah(value: number) {
     return new Intl.NumberFormat('id-ID').format(value);
@@ -80,12 +70,13 @@ function formatRupiah(value: number) {
                     </div>
                 </div>
             </div>
-            <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                <div class="p-4">
+            <div class="relative min-h-[100vh] w-full flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
+                <div class="w-full p-4">
                     <BarChart
+                        class="w-full"
                         :data="data"
-                        index="name"
-                        :categories="['total', 'predicted']"
+                        index="month"
+                        :categories="['total_revenue', 'total_orders']"
                         :y-formatter="
                             (tick, i) => {
                                 return typeof tick === 'number' ? `$ ${new Intl.NumberFormat('us').format(tick).toString()}` : '';
