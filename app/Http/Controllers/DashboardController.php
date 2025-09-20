@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Inertia\Inertia;
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
@@ -51,12 +52,29 @@ class DashboardController extends Controller
             ->get();
 
 
+        $productOutOfStock = Product::whereNot('is_active', 0)
+            ->where('stock', '<=', 5)
+            ->limit(3)
+            ->orderBy('stock', 'asc')
+            ->get()
+            ->map(function ($product) {
+                $product->name = Str::limit($product->name, 37);
+                return $product;
+            });
+
+        $orderProcess = Order::where('status', 'paid')
+            ->where('order_status', 'process')
+            ->count();
+
+        $todayOrder = Order::whereDate('created_at', today('Asia/Jakarta'))->get();
+
         return Inertia::render('Dashboard', [
-            'totalUser' => User::count(),
-            'totalProduct' => Product::count(),
             'totalRevenue' => Order::where('status', 'paid')->sum('total'),
             'percentage' => $percentageChange,
-            'chartData' => $chartData
+            'chartData' => $chartData,
+            'orderProcess' => $orderProcess,
+            'productOutOfStock' => $productOutOfStock,
+            'todayOrder' => $todayOrder
         ]);
     }
 }
