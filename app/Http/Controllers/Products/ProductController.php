@@ -27,7 +27,7 @@ class ProductController extends Controller
 
 
         $products = Product::with('category')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('stock', 'asc')
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
@@ -210,9 +210,17 @@ class ProductController extends Controller
     }
 
 
-    public function print()
+    public function print(Request $request)
     {
-        $products = Product::with('category')->orderBy('stock', 'desc')->get();
+
+
+        $products = Product::with('category')->orderBy('stock', 'asc')
+            ->when($request->status, function ($query, $status) {
+
+                $statusBool = $status == 'active' ? 1 : 0;
+                $query->where('is_active', $statusBool);
+            })
+            ->get();
 
         $pdf = Pdf::loadView('pdf.products', ['products' => $products]);
 

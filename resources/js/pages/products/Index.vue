@@ -233,6 +233,7 @@ function searchKeyword(keyword: string | null) {
                 </div>
                 <div>
                     <form :action="route('print.products')" method="get" target="_blank">
+                        <input type="hidden" v-model="selectedStatus" name="status" />
                         <Button type="submit" class="hover:cursor-pointer">Export PDF <Printer /></Button>
                     </form>
                 </div>
