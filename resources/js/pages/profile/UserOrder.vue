@@ -93,6 +93,7 @@ function continuePay(snap_token: string) {
                                         :class="{
                                             'bg-blue-500 uppercase': order.status == 'pending',
                                             'bg-green-500 uppercase': order.status == 'paid',
+                                            'bg-red-500 uppercase': order.status == 'expire',
                                         }"
                                         >{{ order.status }}</Badge
                                     >
@@ -152,8 +153,9 @@ function continuePay(snap_token: string) {
                         <thead class="bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300">
                             <tr>
                                 <th class="px-4 py-2 text-left font-medium">Produk</th>
-                                <th class="px-4 py-2 font-medium">Harga</th>
+                                <th class="px-4 py-2 text-left font-medium">Catatan</th>
                                 <th class="px-4 py-2 text-center font-medium">Jumlah</th>
+                                <th class="px-4 py-2 font-medium">Harga</th>
                             </tr>
                         </thead>
 
@@ -164,20 +166,22 @@ function continuePay(snap_token: string) {
                                 class="hover:bg-gray-50 dark:bg-gray-600 dark:hover:bg-gray-700"
                             >
                                 <td class="px-4 py-2 text-left">{{ item.product }}</td>
-                                <td class="px-4 py-2">{{ formatRupiah(item.price) }}</td>
+                                <td class="px-4 py-2 text-left">{{ item.notes }}</td>
                                 <td class="px-4 py-2 text-center">{{ item.quantity }}</td>
+                                <td class="px-4 py-2">{{ formatRupiah(item.price) }}</td>
                             </tr>
 
                             <tr class="bg-gray-50 dark:bg-gray-600 dark:hover:bg-gray-700">
                                 <td class="px-4 py-2 text-left font-light">(Pengiriman) {{ selectedOrder?.shipping_service }}</td>
-                                <td class="px-4 py-2">{{ formatRupiah(selectedOrder?.shipping_cost ?? 0) }}</td>
+                                <td class="px-4 py-2 text-left font-light">(Estimasi) {{ selectedOrder?.shipping_etd }}</td>
                                 <td class="px-4 py-2 text-center">1</td>
+                                <td class="px-4 py-2">{{ formatRupiah(selectedOrder?.shipping_cost ?? 0) }}</td>
                             </tr>
                         </tbody>
 
                         <tfoot class="bg-gray-100 font-semibold text-gray-800 dark:bg-gray-600 dark:text-gray-300">
                             <tr>
-                                <td colspan="2" class="px-4 py-2 text-right">Total</td>
+                                <td colspan="3" class="px-4 py-2 text-right">Total</td>
                                 <td class="px-4 py-2 text-center">
                                     {{ formatRupiah(selectedOrder?.total ?? 0) }}
                                 </td>

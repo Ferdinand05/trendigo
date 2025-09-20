@@ -31,7 +31,9 @@ class ProfileUserController extends Controller
 
     public function showOrder()
     {
-        $order = Order::where('user_id', Auth::id())->get();
+        $order = Order::where('user_id', Auth::id())
+            ->whereNot('order_status', 'cancel')
+            ->latest()->get();
         return Inertia::render('profile/UserOrder', [
             'orders' => OrderResource::collection($order),
             'clientKey' => config('midtrans.client_key')
