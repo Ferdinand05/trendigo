@@ -130,27 +130,30 @@
         <thead>
             <tr>
                 <th>Produk</th>
-                <th>Harga</th>
+                <th>Catatan</th>
                 <th class="text-center">Jumlah</th>
+                <th>Harga</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($order->order_items as $item)
                 <tr>
                     <td>{{ $item->product->name }}</td>
-                    <td class="text-right">{{ number_format($item->price, 0, ',', '.') }}</td>
+                    <td>{{ $item->notes }}</td>
                     <td class="text-center">{{ $item->quantity }}</td>
+                    <td class="text-right">{{ number_format($item->price, 0, ',', '.') }}</td>
                 </tr>
             @endforeach
             <tr>
                 <td>(Pengiriman) {{ $order->shipping_service }}</td>
-                <td class="text-right">{{ number_format($order->shipping_cost ?? 0, 0, ',', '.') }}</td>
+                <td>Estimasi {{ $order->shipping_etd }}</td>
                 <td class="text-center">1</td>
+                <td class="text-right">{{ number_format($order->shipping_cost ?? 0, 0, ',', '.') }}</td>
             </tr>
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="2" class="text-right">Total</td>
+                <td colspan="3" class="text-right">Total</td>
                 <td class="text-center">{{ number_format($order->total ?? 0, 0, ',', '.') }}</td>
             </tr>
         </tfoot>
