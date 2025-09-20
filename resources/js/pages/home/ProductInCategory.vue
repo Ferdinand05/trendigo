@@ -22,7 +22,7 @@ import { PaginationLinks, PaginationMeta } from '@/types/pagination';
 import { ProductInterface } from '@/types/products';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { watchDebounced } from '@vueuse/core';
-import { Eye, Plus, Rocket, Search } from 'lucide-vue-next';
+import { Eye, Plus, Rocket, Search, XCircle } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { toast, Toaster } from 'vue-sonner';
 
@@ -72,10 +72,19 @@ function addToCart(id: number | null) {
         preserveScroll: true,
         preserveState: true,
         onSuccess: (result: any) => {
-            toast('Yeayy!', {
-                description: `${result.props.flash.message}`,
-                icon: Rocket,
-            });
+            if (result.props.flash.message == 'Stok produk tidak mencukupi') {
+                toast('Ooops!', {
+                    description: `${result.props.flash.message}`,
+                    icon: XCircle,
+                });
+            } else {
+                toast('Yeayy!', {
+                    description: `${result.props.flash.message}`,
+                    icon: Rocket,
+                });
+            }
+
+            router.reload({ only: ['cartProduct'] });
         },
     });
 }

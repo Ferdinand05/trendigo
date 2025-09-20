@@ -139,7 +139,7 @@ function getProvinces() {
         .get(route('get.provinces'))
         .then(function (response) {
             // handle success
-            console.log(response.data.data);
+            // console.log(response.data.data);
             provinces.value = response.data.data;
         })
         .catch(function (error) {
@@ -152,7 +152,7 @@ function getCities(province_id: number | null) {
         .get(route('get.cities', province_id))
         .then(function (response) {
             // handle success
-            console.log(response.data.data);
+            // console.log(response.data.data);
             cities.value = response.data.data;
         })
         .catch(function (error) {
@@ -165,7 +165,7 @@ function getDistricts(city_id: number | null) {
         .get(route('get.districts', city_id))
         .then(function (response) {
             // handle success
-            console.log(response.data.data);
+            // console.log(response.data.data);
             districts.value = response.data.data;
         })
         .catch(function (error) {
@@ -178,7 +178,7 @@ function getSubDistricts(district_id: number | null) {
         .get(route('get.sub.districts', district_id))
         .then(function (response) {
             // handle success
-            console.log(response.data.data);
+            // console.log(response.data.data);
             sub_districts.value = response.data.data;
         })
         .catch(function (error) {
@@ -241,7 +241,7 @@ function calculateDomesticCost() {
             courier: courier.value,
         })
         .then(function (response) {
-            console.log(response);
+            // console.log(response);
             shippingCost.value = response.data.data;
         })
         .catch(function (error) {
@@ -293,7 +293,7 @@ const createCharge = async () => {
         })
         .then(function (response: any) {
             const { snapToken, clientKey } = response.data;
-            console.log(snapToken);
+            // console.log(response.data);
             // Load Midtrans Snap.js
             if (!document.getElementById('midtrans-script')) {
                 const script = document.createElement('script');
@@ -308,7 +308,7 @@ const createCharge = async () => {
                 // @ts-expect-error snap token midtrans
                 window.snap.pay(snapToken, {
                     onSuccess: function (result: any) {
-                        console.log('success', result);
+                        // console.log('success', result);
 
                         if (result.status_code == 200) {
                             emptyForm();
@@ -355,12 +355,20 @@ const createCharge = async () => {
                             text: 'Pembayaran gagal',
                             icon: 'question',
                         });
+
+                        window.location.reload();
                     },
                 });
             }, 500);
         })
         .catch(function (error: any) {
-            console.log(error);
+            if (error.response.status == 500) {
+                Swal.fire({
+                    title: 'Check kembali barang pesananmu!',
+                    text: `${error.response.data.message}`,
+                    icon: 'error',
+                });
+            }
         })
         .finally(function () {
             disableButtonCheckout.value = false;

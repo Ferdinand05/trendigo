@@ -20,18 +20,33 @@ class CartController extends Controller
         $product = Product::findOrFail($request->id_product);
 
         $quantity = 1;
-
         // cek apakah product sudah ada di cart user ini
         $cartItem = Cart::where('user_id', auth()->id())
             ->where('product_id', $product->id)
             ->first();
 
+
+
+
+
         if ($cartItem) {
+
+
+            if ($product->stock <= $cartItem->quantity) {
+                return Session::flash('message', 'Stok produk tidak mencukupi');
+            }
+
             // sudah ada → update qty & subtotal
             $cartItem->quantity += $quantity;
             $cartItem->subtotal = $cartItem->quantity * $product->price;
             $cartItem->save();
         } else {
+
+
+            if ($product->stock < $quantity) {
+                return Session::flash('message', 'Stok produk tidak mencukupi');
+            }
+
             // belum ada → buat baru
             $cartItem = Cart::create([
                 'user_id' => auth()->id(),

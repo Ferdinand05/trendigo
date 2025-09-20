@@ -9,9 +9,9 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import Separator from '@/components/ui/separator/Separator.vue';
 import { Categories } from '@/types/categories';
 import { ProductInterface } from '@/types/products';
-import { Link, useForm, usePage } from '@inertiajs/vue3';
+import { Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { watchOnce } from '@vueuse/core';
-import { Plus, Rocket } from 'lucide-vue-next';
+import { Plus, Rocket, XCircle } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { toast, Toaster } from 'vue-sonner';
 import 'vue-sonner/style.css';
@@ -59,10 +59,19 @@ function addToCart(id: number | null) {
         preserveScroll: true,
         preserveState: true,
         onSuccess: (result: any) => {
-            toast('Yeayy!', {
-                description: `${result.props.flash.message}`,
-                icon: Rocket,
-            });
+            if (result.props.flash.message == 'Stok produk tidak mencukupi') {
+                toast('Ooops!', {
+                    description: `${result.props.flash.message}`,
+                    icon: XCircle,
+                });
+            } else {
+                toast('Yeayy!', {
+                    description: `${result.props.flash.message}`,
+                    icon: Rocket,
+                });
+            }
+
+            router.reload({ only: ['cartProduct'] });
         },
     });
 }
