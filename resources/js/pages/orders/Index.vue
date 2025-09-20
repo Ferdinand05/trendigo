@@ -25,7 +25,7 @@ import { Order } from '@/types/orders';
 import { PaginationLinks, PaginationMeta } from '@/types/pagination';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { watchDebounced } from '@vueuse/core';
-import { Check, Columns2, EllipsisVertical, FilterIcon, MapPin, Printer, Search, ShoppingCart, Trash } from 'lucide-vue-next';
+import { Check, Columns2, EllipsisVertical, FilterIcon, MapPin, Printer, Search, ShoppingCart, Trash, XCircle } from 'lucide-vue-next';
 import Swal from 'sweetalert2';
 import { ref, watch } from 'vue';
 const breadcrumbs: BreadcrumbItem[] = [
@@ -165,6 +165,33 @@ watch(selectedColumn, (column) => {
         },
     );
 });
+
+function orderCancel(orderId: number) {
+    router.post(
+        route('order.cancel'),
+        {
+            orderId: orderId,
+        },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                if (page.props.flash.message == 'Order Cancel!') {
+                    Swal.fire({
+                        title: 'Canceled!',
+                        text: `${page.props.flash.message}`,
+                        icon: 'success',
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: `${page.props.flash.message}`,
+                    });
+                }
+            },
+        },
+    );
+}
 </script>
 
 <template>
@@ -183,6 +210,7 @@ watch(selectedColumn, (column) => {
                                 <SelectItem value=" "> <Badge variant="outline">All</Badge> </SelectItem>
                                 <SelectItem value="pending"> <Badge variant="secondary">Pending</Badge> </SelectItem>
                                 <SelectItem value="paid"> <Badge class="bg-green-600">Paid</Badge> </SelectItem>
+                                <SelectItem value="expire"> <Badge class="bg-red-600">Expire</Badge> </SelectItem>
                             </SelectGroup>
                         </SelectContent>
                     </Select>
@@ -237,15 +265,28 @@ watch(selectedColumn, (column) => {
                 <TableBody>
                     <TableRow v-for="(order, index) in props.orders.data" :key="order.id">
                         <TableCell>{{ index + 1 }}</TableCell>
-                        <TableCell class="font-medium">
-                            <Badge v-if="order.status == 'paid'" class="bg-green-600 uppercase">{{ order.status }}</Badge>
-                            <Badge v-else-if="order.status == 'pending'" class="uppercase" variant="secondary">{{ order.status }}</Badge>
-                            <Badge v-else class="uppercase" variant="destructive">{{ order.status }}</Badge>
-                        </TableCell>
-                        <TableCell class="font-medium">
-                            <Badge v-if="order.order_status == 'done'" class="bg-green-600 uppercase">{{ order.order_status }}</Badge>
-                            <Badge v-else-if="order.order_status == 'process'" class="uppercase" variant="secondary">{{ order.order_status }}</Badge>
-                        </TableCell>
+                        <TableCell
+                            ><Badge
+                                :variant="order.status == 'pending' ? 'secondary' : 'default'"
+                                class="uppercase"
+                                :class="{
+                                    'bg-red-600': order.status == 'expire',
+                                    'bg-green-600': order.status == 'paid',
+                                }"
+                                >{{ order.status }}</Badge
+                            ></TableCell
+                        >
+                        <TableCell
+                            ><Badge
+                                :variant="order.order_status == 'process' ? 'secondary' : 'default'"
+                                class="uppercase"
+                                :class="{
+                                    'bg-red-600': order.order_status == 'cancel',
+                                    'bg-green-600': order.order_status == 'done',
+                                }"
+                                >{{ order.order_status }}</Badge
+                            ></TableCell
+                        >
                         <TableCell
                             ><kbd>{{ order.order_code }}</kbd></TableCell
                         >
@@ -278,6 +319,9 @@ watch(selectedColumn, (column) => {
                                     <DropdownMenuSeparator v-show="order.order_status == 'process'" />
                                     <DropdownMenuCheckboxItem @click.prevent="orderDone(order.id)" v-show="order.order_status == 'process'">
                                         <Check /> Order Done
+                                    </DropdownMenuCheckboxItem>
+                                    <DropdownMenuCheckboxItem @click.prevent="orderCancel(order.id)" v-show="order.order_status == 'process'">
+                                        <XCircle /> Order Cancel
                                     </DropdownMenuCheckboxItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>

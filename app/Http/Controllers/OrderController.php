@@ -73,6 +73,21 @@ class OrderController extends Controller
             return redirect()->back()->with('message', 'Order must be paid!');
         }
     }
+    public function orderCancel(Request $request)
+    {
+
+        $order = Order::findOrFail($request->orderId);
+
+        if ($order->status == 'expire' || $order->status == 'pending') {
+            $order->update([
+                'order_status' => 'cancel'
+            ]);
+
+            return redirect()->back()->with('message', 'Order Cancel!');
+        } else {
+            return redirect()->back()->with('message', 'You cant do this!');
+        }
+    }
 
 
     public function printOrdersPdf(Request $request)
