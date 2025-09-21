@@ -49,7 +49,11 @@ onUnmounted(() => {
                     <Link href="/" class="rounded-sm px-2 py-1.5 text-[15px] font-medium text-gray-200 hover:text-gray-400" prefetch="hover">
                         Beranda
                     </Link>
-                    <Link href="#product" class="rounded-sm px-2 py-1.5 text-[15px] font-medium text-gray-200 hover:text-gray-400" prefetch="hover">
+                    <Link
+                        :href="route('home') + '#product'"
+                        class="rounded-sm px-2 py-1.5 text-[15px] font-medium text-gray-200 hover:text-gray-400"
+                        prefetch="hover"
+                    >
                         Produk
                     </Link>
 
