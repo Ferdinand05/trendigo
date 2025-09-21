@@ -37,7 +37,7 @@ class CheckoutRequest extends FormRequest
             'postal_code' => 'required|string',
             'shipping_cost' => 'required|numeric',
             'shipping_service_name' => 'required|string',
-            'shipping_etd' => 'required|string',
+            'shipping_etd' => 'nullable|string',
             'total' => 'required|numeric',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
