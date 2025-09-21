@@ -1,6 +1,16 @@
 <script lang="ts" setup>
+import AlertDialog from '@/components/ui/alert-dialog/AlertDialog.vue';
+import AlertDialogAction from '@/components/ui/alert-dialog/AlertDialogAction.vue';
+import AlertDialogCancel from '@/components/ui/alert-dialog/AlertDialogCancel.vue';
+import AlertDialogContent from '@/components/ui/alert-dialog/AlertDialogContent.vue';
+import AlertDialogDescription from '@/components/ui/alert-dialog/AlertDialogDescription.vue';
+import AlertDialogFooter from '@/components/ui/alert-dialog/AlertDialogFooter.vue';
+import AlertDialogHeader from '@/components/ui/alert-dialog/AlertDialogHeader.vue';
+import AlertDialogTitle from '@/components/ui/alert-dialog/AlertDialogTitle.vue';
+import AlertDialogTrigger from '@/components/ui/alert-dialog/AlertDialogTrigger.vue';
 import Badge from '@/components/ui/badge/Badge.vue';
 import Button from '@/components/ui/button/Button.vue';
+import Calendar from '@/components/ui/calendar/Calendar.vue';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent } from '@/components/ui/dropdown-menu';
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue';
@@ -11,6 +21,9 @@ import Pagination from '@/components/ui/pagination/Pagination.vue';
 import PaginationItem from '@/components/ui/pagination/PaginationItem.vue';
 import PaginationNext from '@/components/ui/pagination/PaginationNext.vue';
 import PaginationPrevious from '@/components/ui/pagination/PaginationPrevious.vue';
+import Popover from '@/components/ui/popover/Popover.vue';
+import PopoverContent from '@/components/ui/popover/PopoverContent.vue';
+import PopoverTrigger from '@/components/ui/popover/PopoverTrigger.vue';
 import Select from '@/components/ui/select/Select.vue';
 import SelectContent from '@/components/ui/select/SelectContent.vue';
 import SelectGroup from '@/components/ui/select/SelectGroup.vue';
@@ -20,12 +33,27 @@ import SelectTrigger from '@/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/components/ui/select/SelectValue.vue';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { Order } from '@/types/orders';
 import { PaginationLinks, PaginationMeta } from '@/types/pagination';
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { DateFormatter, DateValue, getLocalTimeZone } from '@internationalized/date';
 import { watchDebounced } from '@vueuse/core';
-import { Check, Columns2, EllipsisVertical, FilterIcon, MapPin, Printer, Search, ShoppingCart, Trash, XCircle } from 'lucide-vue-next';
+import {
+    CalendarIcon,
+    Check,
+    Columns2,
+    EllipsisVertical,
+    Filter,
+    FilterIcon,
+    MapPin,
+    Printer,
+    Search,
+    ShoppingCart,
+    Trash,
+    XCircle,
+} from 'lucide-vue-next';
 import Swal from 'sweetalert2';
 import { ref, watch } from 'vue';
 const breadcrumbs: BreadcrumbItem[] = [
@@ -192,57 +220,164 @@ function orderCancel(orderId: number) {
         },
     );
 }
+
+const selectedOrderStatus = ref('');
+watch(selectedOrderStatus, (order_status) => {
+    router.get(
+        route('orders.index'),
+        {
+            order_status: order_status,
+        },
+        {
+            preserveScroll: true,
+            preserveState: true,
+        },
+    );
+});
+const df = new DateFormatter('id-ID', {
+    dateStyle: 'long',
+});
+const startDate = ref<DateValue>();
+const endDate = ref<DateValue>();
+const formFilterDate = useForm<{
+    startDate: string | null;
+    endDate: string | null;
+}>({
+    startDate: null,
+    endDate: null,
+});
+
+function filterByDate() {
+    formFilterDate.startDate = startDate.value ? startDate.value.toString() : null;
+    formFilterDate.endDate = endDate.value ? endDate.value.toString() : null;
+
+    formFilterDate.get(route('orders.index'), {
+        preserveScroll: true,
+        preserveState: true,
+    });
+}
 </script>
 
 <template>
     <Head title="Dashboard" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <section class="p-10">
-            <div class="mb-2 flex justify-between">
-                <div>
-                    <Select id="status" v-model="selectedStatus">
-                        <SelectTrigger>
-                            <SelectValue> <FilterIcon /> Filter </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>Status</SelectLabel>
-                                <SelectItem value=" "> <Badge variant="outline">All</Badge> </SelectItem>
-                                <SelectItem value="pending"> <Badge variant="secondary">Pending</Badge> </SelectItem>
-                                <SelectItem value="paid"> <Badge class="bg-green-600">Paid</Badge> </SelectItem>
-                                <SelectItem value="expire"> <Badge class="bg-red-600">Expire</Badge> </SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
+            <div class="mb-2 flex flex-wrap md:justify-between">
+                <!--  -->
+                <div class="flex gap-3 space-y-1.5">
+                    <div>
+                        <Select id="status" v-model="selectedStatus">
+                            <SelectTrigger>
+                                <SelectValue> <FilterIcon /> Status </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Status</SelectLabel>
+                                    <SelectItem value=" "> <Badge variant="outline">All</Badge> </SelectItem>
+                                    <SelectItem value="pending"> <Badge variant="secondary">Pending</Badge> </SelectItem>
+                                    <SelectItem value="paid"> <Badge class="bg-green-600">Paid</Badge> </SelectItem>
+                                    <SelectItem value="expire"> <Badge class="bg-red-600">Expire</Badge> </SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div>
+                        <Select id="order_status" v-model="selectedOrderStatus">
+                            <SelectTrigger>
+                                <SelectValue> <Filter /> Order Status </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Order Status</SelectLabel>
+                                    <SelectItem value="process"> <Badge variant="secondary">Process</Badge> </SelectItem>
+                                    <SelectItem value="done"> <Badge class="bg-green-600 text-white">Done</Badge> </SelectItem>
+                                    <SelectItem value="cancel"> <Badge class="bg-red-600 text-white">Cancel</Badge> </SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div>
+                        <Select id="orderby" v-model="selectedColumn">
+                            <SelectTrigger>
+                                <SelectValue> <Columns2 /> Order By </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Column</SelectLabel>
+                                    <SelectItem value="status"> Status </SelectItem>
+                                    <SelectItem value="total"> Total </SelectItem>
+                                    <SelectItem value="order_status"> Order Status </SelectItem>
+                                    <SelectItem value="created_at"> Date </SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
+
+                <!-- filter date -->
                 <div>
-                    <Select id="orderby" v-model="selectedColumn">
-                        <SelectTrigger>
-                            <SelectValue> <Columns2 /> Order By </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>Column</SelectLabel>
-                                <SelectItem value="status"> Status </SelectItem>
-                                <SelectItem value="total"> Total </SelectItem>
-                                <SelectItem value="order_status"> Order Status </SelectItem>
-                                <SelectItem value="created_at"> Date </SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
+                    <AlertDialog>
+                        <AlertDialogTrigger as-child>
+                            <Button variant="outline" @click.prevent="formFilterDate.resetAndClearErrors()"> <CalendarIcon /> Filter By Date </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Date Range</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    <div class="space-y-3">
+                                        <Popover>
+                                            <PopoverTrigger as-child class="w-full">
+                                                <Button
+                                                    variant="outline"
+                                                    :class="cn('w-full justify-start text-left font-normal', !startDate && 'text-muted-foreground')"
+                                                >
+                                                    <CalendarIcon class="mr-2 h-4 w-4" />
+                                                    {{ startDate ? df.format(startDate.toDate(getLocalTimeZone())) : 'Start Date' }}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent class="w-auto p-0">
+                                                <Calendar v-model="startDate" initial-focus />
+                                            </PopoverContent>
+                                        </Popover>
+                                        <Popover>
+                                            <PopoverTrigger as-child class="w-full">
+                                                <Button
+                                                    variant="outline"
+                                                    :class="cn('w-full justify-start text-left font-normal', !endDate && 'text-muted-foreground')"
+                                                >
+                                                    <CalendarIcon class="mr-2 h-4 w-4" />
+                                                    {{ endDate ? df.format(endDate.toDate(getLocalTimeZone())) : 'End Date' }}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent class="w-auto p-0">
+                                                <Calendar v-model="endDate" initial-focus />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction @click.prevent="filterByDate()">Submit</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
             <!-- search and print laporan -->
-            <div class="flex items-center justify-between">
+            <div class="flex items-center gap-x-2 md:justify-between md:gap-x-0">
                 <div class="relative mb-2 w-full max-w-sm items-center md:max-w-md">
                     <Input id="search" v-model="keyword" type="text" placeholder="Search..." class="pl-10" />
                     <span class="absolute inset-y-0 start-0 flex items-center justify-center px-2">
                         <Search class="size-5 text-muted-foreground" />
                     </span>
                 </div>
-                <div>
+                <div class="mb-2">
                     <form :action="route('print.orders.pdf')" method="get" target="_blank">
                         <input type="hidden" v-model="selectedStatus" name="status" />
+                        <input type="hidden" v-model="selectedOrderStatus" name="order_status" />
+                        <input type="hidden" v-model="formFilterDate.startDate" name="startDate" />
+                        <input type="hidden" v-model="formFilterDate.endDate" name="endDate" />
                         <Button type="submit" class="hover:cursor-pointer">Export PDF <Printer /></Button>
                     </form>
                 </div>
