@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Badge from '@/components/ui/badge/Badge.vue';
+import AreaChart from '@/components/ui/chart-area/AreaChart.vue';
 import BarChart from '@/components/ui/chart-bar/BarChart.vue';
 import Table from '@/components/ui/table/Table.vue';
 import TableBody from '@/components/ui/table/TableBody.vue';
@@ -28,6 +29,7 @@ const props = defineProps<{
     chartData: [];
     productOutOfStock: ProductInterface[];
     todayOrder: Order[];
+    orderPerDay: any[];
 }>();
 
 const data = props.chartData;
@@ -35,6 +37,8 @@ const data = props.chartData;
 function formatRupiah(value: number) {
     return new Intl.NumberFormat('id-ID').format(value);
 }
+
+const orderPerDay = props.orderPerDay;
 </script>
 
 <template>
@@ -63,11 +67,15 @@ function formatRupiah(value: number) {
                         </div>
                         <div class="space-y-2">
                             <div class="px-3">
-                                <ul>
+                                <ul v-if="productOutOfStock.length !== 0">
                                     <li class="list-decimal text-sm font-medium" v-for="(product, index) in productOutOfStock" :key="index">
                                         {{ product.name }}
                                     </li>
                                 </ul>
+
+                                <div v-else>
+                                    <h1 class="font-semibold text-gray-600 italic">None</h1>
+                                </div>
                             </div>
                             <div class="text-[14px] text-gray-600 dark:text-gray-400">Products out of stock. Stock less than 5</div>
                         </div>
@@ -90,7 +98,7 @@ function formatRupiah(value: number) {
                 <div class="flex w-full flex-col gap-3 p-2 md:flex-row">
                     <div class="w-full rounded-xl border p-4">
                         <div>
-                            <div class="font-semibold">Chart Revenue and Total Order this year</div>
+                            <div class="font-semibold">Chart Revenue and Total Order PerMonth on this year</div>
                             <div class="mb-3 text-sm text-muted-foreground">Month representated by number</div>
                         </div>
                         <BarChart
@@ -157,6 +165,13 @@ function formatRupiah(value: number) {
                         </Table>
                     </div>
                 </div>
+            </div>
+
+            <div class="w-full rounded-xl border p-4">
+                <div>
+                    <div class="font-semibold">Chart Total Order PerDay on this month</div>
+                </div>
+                <AreaChart :data="orderPerDay" index="date" :categories="['aggregate']" />
             </div>
         </div>
     </AppLayout>

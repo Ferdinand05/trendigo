@@ -17,9 +17,13 @@ class OrderController extends Controller
 
 
 
+
         $orders = Order::query()
             ->when($request->status, function ($query, $status) {
                 $query->where('status', $status);
+            })
+            ->when($request->order_status, function ($query, $order_status) {
+                $query->where('order_status', $order_status);
             })
             ->when($request->keyword, function ($query, $keyword) {
                 $query->where('order_status', 'like', "%{$keyword}%")
@@ -34,6 +38,12 @@ class OrderController extends Controller
             })
             ->when($request->col, function ($query, $column) {
                 $query->orderBy($column, 'asc');
+            })
+            ->when($request->startDate, function ($query, $start) {
+                $query->whereDate('created_at', '>=', $start);
+            })
+            ->when($request->endDate, function ($query, $end) {
+                $query->whereDate('created_at', '<=', $end);
             })
             ->paginate(10)
             ->withQueryString();
@@ -93,11 +103,23 @@ class OrderController extends Controller
     public function printOrdersPdf(Request $request)
     {
 
+
+
         $orders = Order::query()
             ->when($request->status, function ($query, $status) {
                 $query->where('status', $status);
             })
+            ->when($request->order_status, function ($query, $order_status) {
+                $query->where('order_status', $order_status);
+            })
+            ->when($request->startDate, function ($query, $start) {
+                $query->whereDate('created_at', '>=', $start);
+            })
+            ->when($request->endDate, function ($query, $end) {
+                $query->whereDate('created_at', '<=', $end);
+            })
             ->get();
+
         $pdf = Pdf::loadView('pdf.orders', ['orders' => $orders]);
         return $pdf->stream('orders-report.pdf');
     }

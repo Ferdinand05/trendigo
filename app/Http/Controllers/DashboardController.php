@@ -6,6 +6,7 @@ use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Order;
 use App\Models\Product;
+use Flowframe\Trend\Trend;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -68,13 +69,28 @@ class DashboardController extends Controller
 
         $todayOrder = Order::whereDate('created_at', today('Asia/Jakarta'))->get();
 
+
+        // hitung order per hari di bulan
+        $orderPerDay = Trend::query(
+            Order::query()
+                ->where('status', 'paid')
+        )
+            ->between(
+                start: now()->startOfMonth(),
+                end: now()->endOfMonth()
+            )
+            ->perDay()
+            ->count();
+
+
         return Inertia::render('Dashboard', [
-            'totalRevenue' => Order::where('status', 'paid')->sum('total'),
+            'totalRevenue' => $thisMonthRevenue,
             'percentage' => $percentageChange,
             'chartData' => $chartData,
             'orderProcess' => $orderProcess,
             'productOutOfStock' => $productOutOfStock,
-            'todayOrder' => $todayOrder
+            'todayOrder' => $todayOrder,
+            'orderPerDay' => $orderPerDay
         ]);
     }
 }

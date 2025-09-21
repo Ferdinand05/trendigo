@@ -57,6 +57,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/checkout/create-charge', [CheckoutController::class, 'createCharge'])->name('create.charge');
 
 
+    // midtrans payment finish and error 
+    // TODO
+    Route::get('/payment/error');
+    Route::get('payment/finish');
+
     // only admin / super admin can access
     Route::middleware('isAdmin')->group(function () {
 
@@ -91,6 +96,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // dashboard Order
         Route::get('dashboard/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::post('dashboard/orders/order-done', [OrderController::class, 'orderDone'])->name('order.done');
+        Route::post('dashboard/orders/order-cancel', [OrderController::class, 'orderCancel'])->name('order.cancel');
         Route::delete('dashboard/orders/{id}/destroy', [OrderController::class, 'destroy'])->name('order.destroy');
 
         // print order
