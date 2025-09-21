@@ -9,7 +9,7 @@ use Inertia\Inertia;
 
 
 // TODO  Check USER/CUSTOMER MASIH BISA AKSES ?
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'isAdmin'])->group(function () {
     Route::redirect('settings', '/settings/profile');
 
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -25,6 +25,4 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/appearance', function () {
         return Inertia::render('settings/Appearance');
     })->name('appearance');
-
-    Route::get('settings/store', [StoreSettingController::class, 'index'])->name('store.setting.index');
 });
