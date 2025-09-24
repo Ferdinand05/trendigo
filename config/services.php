@@ -41,4 +41,8 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'whatsapp' => [
+        'fonnte_token' => env('FONNTE_TOKEN'),
+    ],
+
 ];

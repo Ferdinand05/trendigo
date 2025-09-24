@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\RestoreProductStock;
+use App\Jobs\SendWhatsappMessageJob;
 use App\Models\Cart;
 use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -36,7 +39,7 @@ class HandleNotificationController extends Controller
 
 
 
-            $order = Order::where('order_code', $orderId)->first();
+            $order = Order::with(['order_items', 'shippingAddress'])->where('order_code', $orderId)->first();
 
             // apakah ada order dengan code terkait ?
             if (!$order) {
@@ -77,6 +80,9 @@ class HandleNotificationController extends Controller
 
                         // hapus cart ketika pembayaran berhasil 
                         Cart::where('user_id', $order->user_id)->delete();
+
+                        // job :  send whatsapp message
+                        SendWhatsappMessageJob::dispatch($order);
                         break;
 
                     case 'pending':
@@ -84,12 +90,16 @@ class HandleNotificationController extends Controller
                         break;
 
                     case 'deny':
+                    case 'fail':
                         $order->status = 'failed';
                         break;
 
                     case 'expire':
                         $order->status = 'expire';
-                        // TODO Kembalikan stock produk
+
+                        // queue ,  Kembalikan stock produk
+                        RestoreProductStock::dispatch($order);
+
                         break;
 
                     case 'cancel':

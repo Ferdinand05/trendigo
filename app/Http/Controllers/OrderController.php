@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\OrderResource;
+use App\Jobs\RestoreProductStock;
 use App\Models\Order;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -92,6 +93,9 @@ class OrderController extends Controller
             $order->update([
                 'order_status' => 'cancel'
             ]);
+
+            // return stock product
+            RestoreProductStock::dispatch($order);
 
             return redirect()->back()->with('message', 'Order Cancel!');
         } else {

@@ -57,7 +57,7 @@ function submit() {
                         />
                         <InputError class="mt-2" :message="form.errors.email" />
                     </div>
-
+                    <div class="my-2 text-sm text-muted-foreground">Anda bergabung pada {{ new Date(page.props.auth.user.created_at) }}</div>
                     <div class="flex items-center gap-4">
                         <Button :disabled="form.processing">Save</Button>
 

@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductResource;
 use App\Models\ProductImages;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 
@@ -26,19 +27,26 @@ class ProductController extends Controller
     {
 
 
-        $products = Product::with('category')
-            ->orderBy('stock', 'asc')
-            ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
-            })
-            ->when($request->status, function ($query, $status) {
-                $is_active = $status === 'active' ? 1 : 0;
-                $query->where('is_active', $is_active);
-            })
-            ->paginate(10)
-            ->withQueryString();
+        $cacheKey = "products:" . md5(json_encode([
+            'search' => $request->search,
+            'status' => $request->status,
+            'page'   => $request->page ?? 1,
+        ]));
 
+        $products = Cache::tags(['products'])->remember($cacheKey, 600, function () use ($request) {
+            return Product::with('category')
+                ->orderBy('stock', 'asc')
+                ->when($request->search, function ($query, $search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                })
+                ->when($request->status, function ($query, $status) {
+                    $is_active = $status === 'active' ? 1 : 0;
+                    $query->where('is_active', $is_active);
+                })
+                ->paginate(10)
+                ->withQueryString();
+        });
 
         return Inertia::render(
             'products/Index',
@@ -53,6 +61,8 @@ class ProductController extends Controller
      */
     public function create()
     {
+
+
         return Inertia::render('products/Create', ['categories' => Category::all()]);
     }
 
@@ -90,6 +100,9 @@ class ProductController extends Controller
                 'image_path' => $path
             ]);
         }
+
+        // hapus semua cache produk
+        Cache::tags(['products'])->flush();
 
         return redirect()->back()->with('message', 'Product created successfully');
     }
@@ -169,6 +182,9 @@ class ProductController extends Controller
             }
         }
 
+        // hapus semua cache produk
+        Cache::tags(['products'])->flush();
+
         return redirect()->back()->with('message', 'Product updated successfully');
     }
 
@@ -185,6 +201,9 @@ class ProductController extends Controller
             }
 
             $product->delete();
+
+            // hapus semua cache produk
+            Cache::tags(['products'])->flush();
 
             Session::flash('message', 'Product has been deleted.');
         } else {
@@ -205,6 +224,9 @@ class ProductController extends Controller
             ->update([
                 'is_active' => $is_active
             ]);
+
+        // hapus semua cache produk
+        Cache::tags(['products'])->flush();
 
         Session::flash('message', 'Product status has been updated');
     }
