@@ -9,6 +9,8 @@ Ecommerce / Online shop , untuk memudahkan pemesanan secara online/daring berbas
 - Riwayat Order
 - Katalog produk
 - Dark mode
+- Keranjang pengingat lewat email
+- Whatsapp message setelah order
 - Pembayaran dengan Payment Gateway -  (Midtrans)
 - Cek Ongkir (JNE,POS, J&T, Lion Parcel) -  (RajaOngkir)
 - Dashboard Admin 
@@ -30,8 +32,8 @@ Dibangun secara monolith (dalam satu codebase)
 
 
 ## 🔗 Links
-[![portfolio](https://img.shields.io/badge/my_portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://katherineoelsner.com/)
-[![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/)
+[![portfolio](https://img.shields.io/badge/my_portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://katherineoelsner.com)
+[![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ferdiinand/)
 [![twitter](https://img.shields.io/badge/twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/)
 
 
@@ -39,6 +41,4 @@ Dibangun secara monolith (dalam satu codebase)
 
 Proyek pribadi, sebagai bagian dari belajar. tidak untuk Diperjualbelikan.
 
-
-![Logo](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/th5xamgrr6se0x5ro4g6.png)
 
