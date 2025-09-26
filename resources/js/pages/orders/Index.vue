@@ -387,7 +387,7 @@ function filterByDate() {
                 <TableHeader>
                     <TableRow>
                         <TableHead>No</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>Payment Status</TableHead>
                         <TableHead>Order Status</TableHead>
                         <TableHead>Code</TableHead>
                         <TableHead>Username</TableHead>
