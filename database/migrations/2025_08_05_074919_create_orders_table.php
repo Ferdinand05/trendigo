@@ -17,17 +17,20 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('shipping_address_id')->constrained()->onDelete('set null');
             $table->decimal('subtotal', 15, 2);
+            $table->string('shipping_name');
             $table->decimal('shipping_cost', 15, 2);
             $table->string('shipping_service'); // JNE, TIKI, POS, dll
             $table->string('shipping_etd'); // Estimasi waktu pengiriman
             $table->decimal('total', 15, 2);
             $table->enum('status', ['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'])->default('pending');
-            $table->string('payment_method')->nullable();
-            $table->string('midtrans_order_id')->nullable(); // Untuk Midtrans
             $table->string('midtrans_transaction_id')->nullable();
             $table->string('midtrans_payment_type')->nullable();
             $table->string('midtrans_transaction_status')->nullable();
+            $table->json('midtrans_response');
+            $table->char('fraud_status');
+            $table->enum('order_status', ['process', 'done', 'cancel']);
             $table->text('midtrans_response')->nullable();
+            $table->string('midtrans_snap_token');
             $table->timestamps();
         });
     }

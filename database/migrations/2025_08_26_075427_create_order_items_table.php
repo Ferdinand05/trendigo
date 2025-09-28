@@ -27,7 +27,7 @@ return new class extends Migration
             $table->integer('quantity')->default(1);
             $table->decimal('price', 12, 2); // harga per item saat order
             $table->decimal('subtotal', 12, 2); // quantity * price
-
+            $table->text('notes');
             $table->timestamps();
         });
     }
